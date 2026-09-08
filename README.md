@@ -1,4 +1,4 @@
-# Customs AI Checker
+<img width="432" height="518" alt="image" src="https://github.com/user-attachments/assets/d9c5d697-4764-4ea6-aeb6-8c17f3e627e2" /># Customs AI Checker
 
 Customs AI Checker là dự án xây dựng hệ thống hỗ trợ kiểm tra chứng từ và dữ liệu khai báo hải quan Việt Nam bằng kết hợp giữa:
 
@@ -80,6 +80,33 @@ V1 không mặc định dùng:
 - agent swarm
 - distributed queue
 
+### Khởi chạy Application
+
+Cài dependencies:
+
+```bash
+pip install -e ".[test]"
+```
+
+Chạy server:
+
+```bash
+uvicorn customs_ai.main:app --reload
+```
+
+Kiểm tra health endpoint:
+
+```text
+http://127.0.0.1:8000/health
+```
+
+Kết quả mong đợi:
+
+```json
+{
+  "status": "ok"
+}
+```
 ---
 
 ## 4. Repository Structure
