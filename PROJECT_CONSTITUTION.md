@@ -245,13 +245,13 @@ Không thay đổi schema làm mất backward compatibility nếu chưa có migr
 
 Khi normalize dữ liệu phải giữ ít nhất:
 
-- raw_value
-- normalized_value
-- source_document
-- page hoặc sheet
+- `raw_value`
+- `normalized_value`
+- `source_document`
+- `page` hoặc `sheet`
 - vị trí nếu xác định được
-- extraction_method
-- confidence nếu do AI tạo ra
+- `extraction_method`
+- `confidence` nếu do AI tạo ra
 
 Ví dụ:
 
@@ -265,28 +265,32 @@ Ví dụ:
   "page": 1,
   "confidence": 0.99
 }
+```
 
 Không được chỉ lưu:
 
+```json
 {
   "invoice_total": 12500
 }
+```
 
 nếu việc đó làm mất khả năng truy vết.
 
-9. PROVENANCE — NGUỒN GỐC DỮ LIỆU
+---
+
+# 9. PROVENANCE — NGUỒN GỐC DỮ LIỆU
 
 Mọi dữ liệu quan trọng phải có khả năng trả lời:
 
-"Thông tin này lấy từ đâu?"
+> "Thông tin này lấy từ đâu?"
 
-Một CheckResult phải liên kết được tới Evidence.
+Một `CheckResult` phải liên kết được tới `Evidence`.
 
 Ví dụ:
 
-ERROR:
-
-Quantity mismatch
+```text
+ERROR — Quantity mismatch
 
 Invoice:
 1000 PCS
@@ -295,12 +299,15 @@ Packing List:
 980 PCS
 
 Evidence:
-INV001.pdf page 1
-PL001.pdf page 2
+- INV001.pdf — page 1
+- PL001.pdf — page 2
+```
 
-Không được tạo ERROR chỉ dựa trên kết luận của AI mà không có dữ liệu nguồn nếu dữ liệu nguồn có thể xác định.
+Không được tạo `ERROR` chỉ dựa trên kết luận của AI mà không có dữ liệu nguồn nếu dữ liệu nguồn có thể xác định.
 
-10. TRẠNG THÁI KẾT QUẢ
+---
+
+# 10. TRẠNG THÁI KẾT QUẢ
 
 Hệ thống phải phân biệt tối thiểu:
 
