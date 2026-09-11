@@ -1,6 +1,6 @@
 # TASK-004 — Local PDF / Excel Parsers
 
-Status: IN_PROGRESS  
+Status: DONE
 Priority: P1  
 Owner: Gemini #1 — Main Developer  
 Reviewer: Gemini #2 — Reviewer / QA  
