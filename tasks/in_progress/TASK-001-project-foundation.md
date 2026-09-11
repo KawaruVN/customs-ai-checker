@@ -1,6 +1,6 @@
 # TASK-001 — Project Foundation
 
-Status: TODO  
+Status: IN_PROGRESS
 Priority: P1  
 Owner: Gemini #1 — Main Developer  
 Reviewer: Gemini #2 — Reviewer / QA  
