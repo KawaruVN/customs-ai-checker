@@ -10,6 +10,7 @@ from pydantic_settings import (
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CONFIG_FILE = BASE_DIR / "config" / "app.yaml"
+ENV_FILE = BASE_DIR / ".env"
 
 class YamlConfigSettingsSource(PydanticBaseSettingsSource):
     """Custom settings source to load YAML configuration."""
@@ -40,7 +41,6 @@ class YamlConfigSettingsSource(PydanticBaseSettingsSource):
 class Settings(BaseSettings):
     app_name: str = "Customs AI Checker"
     
-    # Hỗ trợ cả APP_ENV và ENVIRONMENT từ biến môi trường/file .env
     environment: str = Field(
         default="development",
         validation_alias=AliasChoices("APP_ENV", "ENVIRONMENT", "environment")
@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(ENV_FILE),
         env_file_encoding="utf-8",
         extra="ignore"
     )
