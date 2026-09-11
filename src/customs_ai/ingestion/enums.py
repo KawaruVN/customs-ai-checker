@@ -1,0 +1,12 @@
+from enum import Enum
+
+
+class ProcessingStatus(str, Enum):
+    UPLOADED = "UPLOADED"
+    VALIDATED = "VALIDATED"
+    PARSED = "PARSED"
+    CLASSIFIED = "CLASSIFIED"
+    EXTRACTED = "EXTRACTED"
+    NORMALIZED = "NORMALIZED"
+    FAILED = "FAILED"
+    NEEDS_REVIEW = "NEEDS_REVIEW"

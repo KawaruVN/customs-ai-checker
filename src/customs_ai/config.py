@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -59,11 +59,28 @@ class Settings(BaseSettings):
     )
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
+    max_upload_size_mb: int = Field(default=50, gt=0)
+    upload_root: Path = Path("data/uploads")
+    db_path: Path = Path("data/app.db")
+
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    @model_validator(mode="after")
+    def resolve_runtime_paths(self) -> "Settings":
+        if not self.upload_root.is_absolute():
+            self.upload_root = (BASE_DIR / self.upload_root).resolve()
+        else:
+            self.upload_root = self.upload_root.resolve()
+
+        if not self.db_path.is_absolute():
+            self.db_path = (BASE_DIR / self.db_path).resolve()
+        else:
+            self.db_path = self.db_path.resolve()
+        return self
 
     @classmethod
     def settings_customise_sources(

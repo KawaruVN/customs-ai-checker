@@ -1,11 +1,12 @@
-from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from customs_ai.api.routes import health
+from customs_ai.api import routes
 from customs_ai.config import settings
 from customs_ai.logger import logger
+from customs_ai.repositories.database import init_db
 
 
 @asynccontextmanager
@@ -15,6 +16,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         settings.app_name,
         settings.environment,
     )
+    # Startup intentionally fails if SQLite cannot be initialized.
+    init_db()
     yield
     logger.info("Shutting down %s.", settings.app_name)
 
@@ -25,5 +28,4 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(health.router)
-
+app.include_router(routes.router)

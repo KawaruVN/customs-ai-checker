@@ -1,4 +1,4 @@
-<img width="432" height="518" alt="image" src="https://github.com/user-attachments/assets/d9c5d697-4764-4ea6-aeb6-8c17f3e627e2" /># Customs AI Checker
+# Customs AI Checker
 
 Customs AI Checker là dự án xây dựng hệ thống hỗ trợ kiểm tra chứng từ và dữ liệu khai báo hải quan Việt Nam bằng kết hợp giữa:
 
@@ -62,25 +62,16 @@ V1 tập trung vào:
 
 ## 3. V1 Technology Baseline
 
-- Python 3.12
+- Python 3.12+
 - FastAPI
 - SQLite
 - Pydantic
-- SQLAlchemy nếu cần
 - YAML configuration
 - Local file parsing
 - AI provider abstraction
 - Streamlit hoặc UI mỏng cho prototype nội bộ
 
-V1 không mặc định dùng:
-
-- microservices
-- Kubernetes
-- vector database
-- agent swarm
-- distributed queue
-
-### Khởi chạy Application
+### Khởi chạy application
 
 Cài dependencies:
 
@@ -94,19 +85,27 @@ Chạy server:
 uvicorn customs_ai.main:app --reload
 ```
 
-Kiểm tra health endpoint:
+Health endpoint:
 
 ```text
-http://127.0.0.1:8000/health
+GET http://127.0.0.1:8000/health
 ```
 
-Kết quả mong đợi:
+### Ingestion API
 
-```json
-{
-  "status": "ok"
-}
+Upload chứng từ:
+
+```text
+POST /shipments/{shipment_id}/documents
+Content-Type: multipart/form-data
 ```
+
+V1 hỗ trợ `.pdf`, `.xls`, `.xlsx`, `.csv`, `.docx`, `.jpg`, `.jpeg`, `.png`. Giới hạn mặc định là 50 MiB và có thể cấu hình bằng `MAX_UPLOAD_SIZE_MB`.
+
+Trong TASK-003, file được stream xuống temporary storage, kiểm tra size, tính SHA-256, kiểm tra loại nội dung/MIME và duplicate theo từng Shipment, sau đó lưu metadata vào SQLite. Runtime paths mặc định là `data/uploads` và `data/app.db`; các path tương đối luôn được resolve theo project root, không theo current working directory.
+
+TASK-003 chỉ thực hiện ingestion. Chưa chạy OCR, parser nội dung, document classification hay AI extraction.
+
 ---
 
 ## 4. Repository Structure
@@ -125,13 +124,10 @@ customs-ai-checker/
 ├── rules/
 ├── src/
 ├── tasks/
-│   ├── todo/
-│   ├── in_progress/
-│   └── done/
 └── test_documents/
 ```
 
-Cấu trúc kỹ thuật chi tiết sẽ được Developer triển khai theo `ARCHITECTURE.md`.
+Cấu trúc kỹ thuật chi tiết xem `ARCHITECTURE.md`.
 
 ---
 
@@ -143,35 +139,15 @@ Quyết định nghiệp vụ, scope và release cuối cùng.
 
 ### ChatGPT — Project Leader / Architect
 
-Phụ trách:
-
-- architecture;
-- specification;
-- decomposition;
-- task definition;
-- technical decision;
-- final review recommendation.
+Phụ trách kiến trúc, spec và duyệt kỹ thuật.
 
 ### Gemini #1 — Main Developer
 
-Phụ trách:
-
-- implementation;
-- tests;
-- documentation;
-- self-review.
+Phụ trách implementation, tests, documentation.
 
 ### Gemini #2 — Reviewer / QA
 
-Phụ trách:
-
-- review correctness;
-- edge cases;
-- false negative;
-- false positive;
-- security;
-- cost;
-- regression risk.
+Phụ trách review edge cases, security, cost.
 
 ---
 
@@ -195,57 +171,24 @@ Project Leader final decision
 tasks/done/
 ```
 
-Task phải tuân theo `TASK_TEMPLATE.md`.
-
 ---
 
-## 7. Source of Truth
-
-Thứ tự ưu tiên:
-
-```text
-PROJECT_CONSTITUTION.md
-→ MASTER_SPEC.md
-→ ARCHITECTURE.md
-→ DATA_SCHEMA / RULE FORMAT
-→ TASK
-→ IMPLEMENTATION
-```
-
-Nếu có conflict, không tự suy đoán. Báo Project Leader.
-
----
-
-## 8. Security
+## 7. Security
 
 Không commit:
 
 - `.env`
-- API keys
-- passwords
-- tokens
+- API keys, passwords, tokens
 - dữ liệu khách hàng thật
-- production database
-- private certificates
+- production database (`app.db`)
+- files lưu trữ nội bộ (`data/uploads`)
 
-`test_documents/` chỉ chứa dữ liệu:
-
-- synthetic;
-- anonymized;
-- hoặc được phép sử dụng.
+`test_documents/` chỉ chứa dữ liệu synthetic, anonymized hoặc được phép sử dụng.
 
 ---
 
-## 9. Current Status
+## 8. Current Status
 
-Current phase:
+Current phase: `V1 — Foundation`
 
-`V1 — Foundation`
-
-Current next task:
-
-`TASK-001 — Project Foundation`
-
----
-
-# END
+Current task: `TASK-003 — File Ingestion + Hashing`
