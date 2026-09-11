@@ -202,3 +202,10 @@ TASK-004 adds deterministic local parsing for persisted PDF, XLSX, and legacy XL
 - XLS uses `xlrd` and preserves sheet/cell provenance plus available merged/hidden metadata.
 - Parsing starts from a persisted `SourceDocument`; stored paths are resolved and constrained to the configured upload root.
 - Parsers never classify document business type, execute formulas/macros, call AI/network services, or modify uploaded source files.
+
+### Document Classification
+Classification evaluates technical parsed content deterministically against configured clues (no AI/network calls). 
+- Filename is entirely ignored for scoring. Content is the sole source of truth.
+- Resolves conflicts conservatively: weak or conflicting evidence securely defaults to `UNKNOWN` (needs review).
+- `OTHER` is reserved for explicit manual classification, and is never inferred merely by the absence of clues.
+- Generic references such as `PO NO`, `FORM E`, and `C/O` are supporting clues only and cannot classify a document by themselves.

@@ -1,0 +1,98 @@
+settings:
+  threshold: 0.5
+  conflict_margin: 0.15
+  strong_weight: 0.6
+  supporting_weight: 0.2
+
+clues:
+  COMMERCIAL_INVOICE:
+    strong:
+      - "COMMERCIAL INVOICE"
+      - "商业发票"
+      - "HÓA ĐƠN THƯƠNG MẠI"
+    supporting:
+      - "INVOICE NO"
+      - "INVOICE NUMBER"
+      - "UNIT PRICE"
+      - "TOTAL AMOUNT"
+  PACKING_LIST:
+    strong:
+      - "PACKING LIST"
+      - "装箱单"
+      - "PHIẾU ĐÓNG GÓI"
+      - "BẢNG KÊ ĐÓNG GÓI"
+    supporting:
+      - "GROSS WEIGHT"
+      - "NET WEIGHT"
+      - "PACKAGE"
+      - "CARTON"
+  BILL_OF_LADING:
+    strong:
+      - "BILL OF LADING"
+      - "提单"
+      - "B/L"
+      - "B.L."
+    supporting:
+      - "VESSEL"
+      - "PORT OF LOADING"
+      - "PORT OF DISCHARGE"
+      - "SHIPPER"
+      - "CONSIGNEE"
+  AIR_WAYBILL:
+    strong:
+      - "AIR WAYBILL"
+      - "航空运单"
+      - "AWB"
+    supporting:
+      - "FLIGHT"
+      - "AIRPORT OF DEPARTURE"
+      - "AIRPORT OF DESTINATION"
+  CUSTOMS_DECLARATION:
+    strong:
+      - "CUSTOMS DECLARATION"
+      - "TỜ KHAI HẢI QUAN"
+      - "报关单"
+      - "海关申报"
+    supporting:
+      - "DECLARATION NO"
+      - "CUSTOMS OFFICE"
+      - "HS CODE"
+  CONTRACT:
+    strong:
+      - "SALES CONTRACT"
+      - "PURCHASE CONTRACT"
+      - "HỢP ĐỒNG"
+      - "合同"
+    supporting:
+      - "PARTY A"
+      - "PARTY B"
+  PURCHASE_ORDER:
+    strong:
+      - "PURCHASE ORDER"
+      - "采购订单"
+      - "ĐƠN ĐẶT HÀNG"
+    supporting:
+      - "PO NO"
+  CERTIFICATE_OF_ORIGIN:
+    strong:
+      - "CERTIFICATE OF ORIGIN"
+      - "GIẤY CHỨNG NHẬN XUẤT XỨ"
+      - "原产地证"
+    supporting:
+      - "C/O"
+      - "FORM E"
+      - "FORM D"
+  CATALOGUE:
+    strong:
+      - "CATALOGUE"
+      - "PRODUCT CATALOG"
+      - "DANH MỤC SẢN PHẨM"
+      - "产品目录"
+    supporting: []
+  SPECIFICATION:
+    strong:
+      - "TECHNICAL SPECIFICATION"
+      - "THÔNG SỐ KỸ THUẬT"
+      - "技术规格"
+    supporting:
+      - "SPECIFICATION"
