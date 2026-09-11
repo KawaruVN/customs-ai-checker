@@ -92,3 +92,28 @@ def test_init_db_failure_propagates(monkeypatch, tmp_path):
 
     with pytest.raises(sqlite3.OperationalError):
         init_db()
+
+
+def test_update_parsing_metadata_preserves_classification_fields():
+    from customs_ai.ingestion.enums import ProcessingStatus
+
+    repo = SourceDocumentRepository()
+    document = dummy_document(document_id="DOC-PARSE-META", shipment_id="SHP-PARSE-META", seed=b"parse-meta")
+    repo.create(document)
+
+    repo.update_parsing_metadata(
+        document_id="DOC-PARSE-META",
+        processing_status=ProcessingStatus.PARSED,
+        parser_used="pypdf",
+        page_count=3,
+        sheet_count=None,
+    )
+
+    refreshed = repo.get_by_document_id("DOC-PARSE-META")
+    assert refreshed.processing_status == ProcessingStatus.PARSED
+    assert refreshed.parser_used == "pypdf"
+    assert refreshed.page_count == 3
+    assert refreshed.sheet_count is None
+    assert refreshed.detected_document_type is None
+    assert refreshed.classification_confidence is None
+    assert refreshed.extraction_status is None

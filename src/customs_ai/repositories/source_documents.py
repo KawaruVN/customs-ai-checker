@@ -65,3 +65,27 @@ class SourceDocumentRepository:
                 (document_id,),
             ).fetchone()
         return SourceDocument(**dict(row)) if row else None
+
+
+    def update_parsing_metadata(
+        self,
+        document_id: str,
+        processing_status,
+        parser_used: str,
+        page_count: int | None,
+        sheet_count: int | None,
+    ) -> None:
+        query = """
+            UPDATE source_documents
+            SET processing_status = ?, parser_used = ?, page_count = ?, sheet_count = ?
+            WHERE document_id = ?
+        """
+        status_value = getattr(processing_status, "value", processing_status)
+        with get_connection() as connection:
+            cursor = connection.execute(
+                query,
+                (status_value, parser_used, page_count, sheet_count, document_id),
+            )
+            if cursor.rowcount != 1:
+                raise LookupError("SourceDocument not found during parser metadata update.")
+            connection.commit()

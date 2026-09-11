@@ -192,3 +192,13 @@ Không commit:
 Current phase: `V1 — Foundation`
 
 Current task: `TASK-003 — File Ingestion + Hashing`
+
+## Local parser layer
+
+TASK-004 adds deterministic local parsing for persisted PDF, XLSX, and legacy XLS files.
+
+- PDF uses `pypdf`, preserves page boundaries, and flags documents with no locally extractable text as `needs_ocr=true`; OCR is not performed in this task.
+- XLSX uses `openpyxl` and preserves populated-cell coordinates, formulas, number formats, merged ranges, sheet state, and hidden row/column metadata.
+- XLS uses `xlrd` and preserves sheet/cell provenance plus available merged/hidden metadata.
+- Parsing starts from a persisted `SourceDocument`; stored paths are resolved and constrained to the configured upload root.
+- Parsers never classify document business type, execute formulas/macros, call AI/network services, or modify uploaded source files.
