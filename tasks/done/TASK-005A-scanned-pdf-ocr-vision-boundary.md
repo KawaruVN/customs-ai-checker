@@ -1,6 +1,6 @@
 # TASK-005A — Scanned PDF Local Document Vision + OCR Verification
 
-Status: IN_PROGRESS
+Status: DONE
 Priority: P1
 Owner: Gemini #1 — Main Developer
 Reviewer: Gemini #2 — Reviewer / QA
@@ -397,5 +397,9 @@ Do not claim smoke success unless actually executed.
 
 ## Project Leader status
 
-IN_PROGRESS — implementation remains under Gemini #1 rework.
+APPROVED — 2026-09-11.
 
+- Authoritative local validation: 178 passed, 0 failed, 0 skipped, 2 warnings.
+- Gemini #2 Review Round: PASS / APPROVE.
+- Project Leader final decision: APPROVE / CLOSE TASK-005A.
+- Manual RapidOCR and PaddleOCR-VL smoke remain a pre-production operational gate before enabling `VISION__ENABLED=true`; they do not block code-task closure.

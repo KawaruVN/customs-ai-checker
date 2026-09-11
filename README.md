@@ -191,7 +191,7 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-005A — Scanned PDF Local Document Vision + OCR Verification`
+Current task: `TASK-006 — Invoice Extraction` (not started)
 
 ## Local parser layer
 
