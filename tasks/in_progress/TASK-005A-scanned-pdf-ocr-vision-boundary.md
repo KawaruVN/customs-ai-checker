@@ -4,493 +4,293 @@ Status: IN_PROGRESS
 Priority: P1
 Owner: Gemini #1 — Main Developer
 Reviewer: Gemini #2 — Reviewer / QA
-Created: 2026-09-11
 Updated: 2026-09-11
 Target Version: V1
 Dependencies: TASK-001..TASK-005 DONE
-Related ADR: None
 
----
+## Objective
 
-## 1. OBJECTIVE
+Implement an accuracy-first, local-only page-resolution layer between TASK-004 parsing and downstream classification.
 
-Add an accuracy-first, local-only visual document resolution layer between TASK-004 parsing and downstream classification/extraction.
-
-The project deliberately prioritizes correctness over raw speed for scanned pages.
-
-Production strategy:
+Production path:
 
 ```text
-TIER 0 — Native PDF text
-pypdf
-↓
-usable?
-├─ YES → preserve native text; no visual model needed
-└─ NO  → visual page path
+Usable native PDF text
+→ preserve pypdf text
+→ no OCR/VLM
 
-VISUAL PAGE PATH — ACCURACY FIRST
-PaddleOCR-VL 1.6
-↓
-document text + layout/structure
-↓
-RapidOCR verification / literal OCR
-↓
-reconcile evidence
-├─ sufficiently consistent → resolved page
-└─ materially conflicting / still unusable → NEEDS_REVIEW
+Unusable/scanned PDF page
+→ render once in memory
+→ PaddleOCR-VL 1.6 (primary document vision)
+→ RapidOCR 3.x (independent literal OCR verifier)
+→ central quality gate
+→ typed high-signal reconciliation
+→ resolved text OR NEEDS_REVIEW
 ```
 
-No external AI/API call is allowed in TASK-005A.
+No hosted AI/API call is allowed in TASK-005A.
 
----
+## Mandatory architectural decisions
 
-## 2. DESIGN PRINCIPLE
+### Native text
 
-For clean digital PDFs, native text is the most faithful and cheapest source and remains Tier 0.
+Per-page decision only.
 
-For scanned / image-only / unusable-text pages:
+TASK-004 document-level `needs_ocr` is insufficient for mixed PDFs.
 
-- **PaddleOCR-VL 1.6 is the primary visual document parser** because the project values layout/table/document understanding.
-- **RapidOCR is the independent literal-text verifier and resilience fallback**, not the primary semantic parser.
+Usable native text:
+- preserved unchanged;
+- source = TEXT_LAYER;
+- no rendering;
+- no VLM;
+- no OCR.
 
-This is intentionally different from an OCR-first pipeline.
+### PaddleOCR-VL
 
-The project must never treat a generative/document-VLM output as unquestionable ground truth for critical literal values.
+Use actual PaddleOCR-VL 1.6 document parsing.
 
----
+Do not substitute standard `PaddleOCR(...)`.
 
-## 3. WHY BOTH PROVIDERS ARE KEPT
+Current implementation direction:
+- main Customs AI application remains Windows / Python 3.13;
+- PaddleOCR-VL runs in an isolated local WSL2/Linux or Docker service;
+- main application communicates only over loopback.
 
-PaddleOCR-VL is useful for:
-- reading-order understanding;
-- complex page layout;
-- tables;
-- visually structured documents;
-- difficult scans.
+Local service must use the current official `PaddleOCRVL` API and `pipeline_version="v1.6"` or verified equivalent.
 
-RapidOCR is useful for:
-- literal character recognition;
-- independent cross-checking;
-- fast fallback if the local VLM is unavailable;
-- later verification of high-risk numeric/string fields.
+### RapidOCR
 
-Therefore the architecture uses:
+Use the current `rapidocr` 3.x package.
 
-```text
-PaddleOCR-VL = primary visual understanding
-RapidOCR     = independent verification / fallback
-```
+Do not use:
+- `rapidocr-onnxruntime`;
+- `from rapidocr_onnxruntime import RapidOCR`.
 
-Do not remove either boundary.
+Adapter must follow the actual current RapidOCR 3.x result API.
 
----
+### Local-only security
 
-## 4. SCANNED PAGE POLICY
+The VLM endpoint must allow only:
+- `127.0.0.1`
+- `localhost`
+- `::1`
 
-For every PDF page:
+Reject:
+- LAN IPs;
+- public IPs;
+- arbitrary DNS hosts.
 
-### A. Native text is usable
-Return:
+A configuration change must not be able to send customer page images outside the local machine.
 
-```text
-source = TEXT_LAYER
-```
+### Model assets
 
-Do not call PaddleOCR-VL.
-Do not call RapidOCR.
+Normal document processing must never silently download model assets.
 
-### B. Native text is unusable
+PaddleOCR-VL service must:
+- use explicit configured local model directories;
+- validate assets at startup;
+- expose readiness in health endpoint;
+- fail deterministically if assets are missing.
 
-Default project mode:
+Model preparation is a separate setup operation.
 
-```text
-accuracy_mode = true
-```
+## Raw provider contract
 
-Then:
-
-1. render the page locally in memory;
-2. run PaddleOCR-VL 1.6;
-3. run RapidOCR on the same rendered page;
-4. normalize both outputs only for comparison;
-5. reconcile them conservatively;
-6. retain provider-specific evidence/provenance.
-
-If one provider is unavailable:
-- use the other if its result passes quality gates;
-- record reduced verification strength;
-- do not fabricate agreement.
-
-If both fail or materially conflict:
-- page is unresolved or requires review.
-
----
-
-## 5. RECONCILIATION CONTRACT
-
-Do not simply concatenate provider outputs.
-
-Introduce a provider-neutral reconciliation result.
+Provider outputs are raw observations.
 
 Conceptually:
 
 ```text
-VisualAgreement:
-- vlm_usable: bool
-- ocr_usable: bool
-- agreement_score: float | None
-- material_conflict: bool
-- verification_level:
-    - UNVERIFIED
-    - SINGLE_PROVIDER
-    - CROSS_VERIFIED
-    - CONFLICT
-```
-
-Comparison should be deterministic and lightweight.
-
-Possible signals:
-- normalized text overlap;
-- presence/absence of strong document clues;
-- exact numeric token agreement;
-- exact identifier-like token agreement;
-- disagreement on short critical-looking tokens.
-
-Do NOT attempt TASK-006 business extraction inside TASK-005A.
-
----
-
-## 6. CRITICAL TOKEN SAFETY
-
-Even before structured Invoice extraction exists, TASK-005A may compare literal token classes generically:
-
-- numbers;
-- decimal values;
-- percentages;
-- dates;
-- identifier-like alphanumeric strings;
-- currency-like tokens.
-
-It MUST NOT label them as invoice number, amount, HS code, etc. yet.
-
-If PaddleOCR-VL and RapidOCR materially disagree on many literal numeric/identifier tokens:
-
-```text
-requires_review = true
-```
-
-This is especially important because document VLMs can normalize, omit or infer content.
-
----
-
-## 7. PROVIDER-NEUTRAL MODELS
-
-Conceptually:
-
-```text
-TextResolutionSource:
-- TEXT_LAYER
-- DOCUMENT_VISION_LOCAL
-- OCR_LOCAL
-- CROSS_VERIFIED_VISUAL
-- UNRESOLVED
-```
-
-```text
-ProviderTextResult:
+ProviderTextResult
 - provider
 - text
 - confidence: float | None
-- usable: bool
-- structured_content: object | string | None
+- optional provider-neutral structured content
 ```
+
+Do not let provider objects self-certify trust with `usable=True`.
+
+Trust is computed centrally:
 
 ```text
-ResolvedPdfPage:
-- page
-- text
-- source
-- confidence: float | None
-- verification_level
-- agreement_score: float | None
-- requires_review
-- provider_results[]
+vlm_usable = evaluator.evaluate_provider_result(...)
+ocr_usable = evaluator.evaluate_provider_result(...)
 ```
 
-```text
-ResolvedPdfDocument:
-- document_id
-- page_count
-- pages[]
-- visual_pages[]
-- unresolved_pages[]
-- requires_review
-- vision_fallback_recommended
-```
+## Text quality gate
 
-Exact names may vary if coherent and strict.
+Shared text statistics must support:
+- Vietnamese;
+- Chinese;
+- English.
 
-Never erase the fact that text came from a visual model versus literal OCR.
+Configurable checks:
+- minimum meaningful-character count;
+- maximum control/NUL ratio;
+- maximum replacement-character ratio;
+- minimum meaningful-character ratio;
+- confidence threshold where confidence exists.
 
----
+Symbol-only garbage must not pass.
 
-## 8. TEXT SOURCE PRIORITY
+## Reconciliation
 
-When choosing the resolved text presented to TASK-005 classification:
+Use separate token classes.
 
-1. usable native text layer;
-2. cross-verified visual result;
-3. PaddleOCR-VL result if usable and no material contradiction exists;
-4. RapidOCR result if PaddleOCR-VL unavailable/unusable and RapidOCR passes quality gates;
-5. unresolved.
+### Dates
 
-For a material provider conflict:
+Extract recognized date-like tokens first.
 
-```text
-classification must not receive a fabricated merged text
-```
+Normalize only safely recognized formats.
 
-Prefer unresolved/review behavior.
+Do not infer ambiguous date semantics.
 
----
+### Numbers
 
-## 9. PADDLEOCR-VL 1.6 PROVIDER
+Support at minimum:
+- `12500`
+- `12500.50`
+- `12,500.50`
 
-Add a project-owned `LocalDocumentVisionProvider` interface.
+Handle punctuation conservatively.
 
-PaddleOCR-VL implementation requirements:
-- local only;
-- provider isolated;
-- lazy/reused initialization;
-- explicit local model assets;
-- no silent first-document download;
-- no content logging;
-- no absolute model-path leakage;
-- bounded page/resource limits;
-- CPU/GPU backend details isolated from orchestration;
-- no downstream classifier imports Paddle-specific objects.
+Equivalent, safely-normalizable forms must not conflict only because formatting differs.
 
-Do not make vLLM/FastDeploy mandatory unless independently justified.
+### Identifiers
 
----
+Identifier-like tokens require signals such as:
+- at least one digit; or
+- meaningful alphanumeric separator structure.
 
-## 10. RAPIDOCR PROVIDER
+Examples:
+- `INV-001`
+- `ABC123`
+- `CONT/2026/01`
 
-Add a project-owned `LocalOcrProvider` interface.
+Ordinary words such as:
+- `Invoice`
+- `Amount`
+- `Container`
 
-RapidOCR implementation requirements:
-- local only;
-- ONNX/runtime isolated;
-- reused initialization;
-- line/text conversion provider-neutral;
-- confidence bounded `[0,1]`;
-- no content logging;
-- no source mutation.
+must not automatically become identifiers.
 
-In default accuracy mode, RapidOCR verifies scanned pages even when PaddleOCR-VL produces a usable result.
+Case-normalize identifiers for comparison.
 
-A future performance mode may make verification conditional, but that is not the default V1 behavior.
+### Conflict policy
 
----
+If both accepted providers materially disagree on high-signal tokens:
+- source = UNRESOLVED;
+- verification = CONFLICT;
+- requires_review = true;
+- do not merge text;
+- do not force classification.
 
-## 11. PDF RENDERING
+Soft text overlap may be a secondary signal only.
 
-Preferred local renderer:
-`pypdfium2`.
+## PDF rendering
+
+Preferred renderer:
+`pypdfium2`
 
 Requirements:
-- render only visual pages;
-- one render can be reused by both PaddleOCR-VL and RapidOCR;
-- no duplicate page rendering for the two providers;
-- image remains in memory by default;
-- bounded DPI/pixel size;
-- source PDF unchanged;
-- deterministic errors;
-- external page numbering remains 1-based.
+- render only pages that need visual processing;
+- one render reused by both VLM and OCR;
+- in-memory by default;
+- bounded DPI;
+- bounded max pixels;
+- bounded visual pages/document;
+- guaranteed resource cleanup;
+- source file immutable.
 
----
+Dedicated error:
+`PDF_RENDER_LIMIT_EXCEEDED`
 
-## 12. PAGE TEXT QUALITY
+## Local PaddleOCR-VL service
 
-Implement a deterministic multilingual-safe quality evaluator.
+Must provide:
+- actual PaddleOCR-VL 1.6 initialization;
+- explicit local model paths;
+- startup validation;
+- `/health`;
+- `/v1/vision`;
+- strict request/response models;
+- bounded image upload;
+- deterministic 503 unavailable behavior;
+- deterministic inference-failed behavior;
+- safe logging;
+- explicit one-job or bounded concurrency suitable for prototype GPU hardware.
 
-Consider:
-- non-whitespace character count;
-- meaningful Unicode letter/digit/CJK count;
-- printable ratio;
-- control/replacement-character ratio.
+Do not use Flask-style tuple status responses in FastAPI.
 
-Must work with:
-- English;
-- Vietnamese;
-- Chinese.
+## Main-app VLM client
 
-Must not:
-- strip Vietnamese diacritics;
-- require ASCII;
-- require English words;
-- infer customs semantics.
+Requirements:
+- loopback-only validated endpoint;
+- short bounded timeouts;
+- strict response validation;
+- malformed JSON handling;
+- confidence range validation;
+- deterministic unavailable vs inference-failed errors;
+- no raw remote/local exception text in logs.
 
----
+Pytest must mock HTTP transport and must not open a real socket.
 
-## 13. CLASSIFICATION HANDOFF
+## Classification handoff
 
-TASK-005 classifier remains deterministic and unchanged in clue semantics.
+TASK-005 clue/scoring semantics remain unchanged.
 
-Required flows:
+Required behavior:
 
 ```text
-scanned Commercial Invoice
-→ PaddleOCR-VL sees COMMERCIAL INVOICE
-→ RapidOCR confirms literal clue
-→ resolved text
-→ TASK-005
+safe resolved scanned Invoice
+→ deterministic TASK-005 classifier
 → COMMERCIAL_INVOICE
 ```
 
 ```text
-PaddleOCR-VL says COMMERCIAL INVOICE
-RapidOCR says PACKING LIST
-→ material conflict
-→ no forced classification
+provider conflict
+→ no fabricated text
 → UNKNOWN / NEEDS_REVIEW
 ```
 
-```text
-PaddleOCR-VL unavailable
-RapidOCR confidently reads COMMERCIAL INVOICE
-→ classifier may proceed
-→ provenance shows single-provider verification
-```
+Excel bypasses visual processing.
 
----
+## Production composition
 
-## 14. EXCEL
+Provide a real application composition/factory path that wires:
+- repository;
+- parsing service;
+- PaddleOCR-VL client;
+- RapidOCR provider;
+- visual resolution service;
+- deterministic classifier;
+- classification service.
 
-XLS/XLSX:
-- no PaddleOCR-VL;
-- no RapidOCR;
-- existing TASK-004 parse path unchanged.
+Vision-disabled mode must not initialize visual providers.
 
----
+Importing the app must not download/load models.
 
-## 15. EXTERNAL NETWORK POLICY
+## Privacy and logging
 
-Normal document processing:
-
-```text
-External network calls = 0
-Paid API calls = 0
-```
-
-Do not implement hosted:
-- OpenAI;
-- Gemini;
-- SiliconFlow;
-- Novita;
-- remote Paddle API;
-- other vendor API.
-
-A future external vision provider may be added in a separate approved task.
-
----
-
-## 16. MODEL ASSET POLICY
-
-Model preparation is an explicit setup step.
-
-A document request must never trigger uncontrolled model downloads.
-
-If assets are missing:
-
-```text
-DOCUMENT_VISION_UNAVAILABLE
-```
-
-RapidOCR may still be used if available.
-
-Do not hide compatibility failures.
-
----
-
-## 17. ERRORS
-
-At minimum:
-
-```text
-OCR_ENGINE_UNAVAILABLE
-OCR_FAILED
-
-DOCUMENT_VISION_UNAVAILABLE
-DOCUMENT_VISION_FAILED
-
-PDF_RENDER_FAILED
-VISUAL_RESULT_CONFLICT
-VISUAL_PAGE_LIMIT_EXCEEDED
-TEXT_RESOLUTION_FAILED
-```
-
-Exposed errors/logs must not contain:
-- document text;
+Never log:
+- OCR/VLM full text;
 - page image bytes;
-- absolute source path;
-- local model path;
-- credentials.
+- absolute source paths;
+- local model paths;
+- credentials;
+- raw provider exception strings;
+- tracebacks from document/provider processing.
 
-A content disagreement is normally a review condition, not necessarily a process crash.
+Safe logs only:
+- document id;
+- page;
+- provider id;
+- safe error code;
+- timing/metrics without content.
 
----
+## Required tests
 
-## 18. RESOURCE LIMITS
-
-Config must include validated limits conceptually covering:
-- render DPI;
-- max render pixels;
-- max visual pages/document;
-- VLM max concurrency;
-- OCR/VLM enabled flags;
-- text-quality thresholds;
-- provider acceptance thresholds;
-- reconciliation/material-conflict threshold.
-
-For the user's workstation-oriented V1:
-- conservative VLM concurrency is preferred;
-- accuracy is prioritized over throughput.
-
----
-
-## 19. DEPENDENCY POLICY
-
-Preferred direction:
-- pypdfium2;
-- RapidOCR;
-- ONNX Runtime;
-- PaddleOCR 3.x / PaddleOCR-VL 1.6.
-
-Gemini #1 must verify actual current Windows/Python 3.13 compatibility before exact version pins.
-
-Prefer optional dependency groups where coherent.
-
-Do not introduce merely for this task:
-- PyTorch;
-- TensorFlow;
-- EasyOCR;
-- LangChain;
-- LlamaIndex;
-- OCRmyPDF;
-- system Tesseract.
-
-If local PaddleOCR-VL dependencies cannot be made compatible without destabilizing the main Python 3.13 application:
-- preserve the provider interface;
-- isolate local inference cleanly;
-- report the real blocker;
-- do not fake support.
-
----
-
-## 20. TEST REQUIREMENTS
-
-Authoritative pre-task local baseline:
+Authoritative baseline before TASK-005A:
 
 ```text
 Windows
@@ -499,155 +299,86 @@ pytest 9.1.1
 139 passed
 0 failed
 0 skipped
-2 pre-existing warnings
+2 known warnings
 ```
 
 Final suite must exceed 139 and pass.
 
-Tests must use fakes/mocks for provider engines.
-Pytest must not download real models or use network.
+Pytest:
+- no Internet;
+- no localhost socket;
+- no GPU;
+- no model download;
+- no dependency-based skip.
 
-### Native text
-- clean PDF calls neither provider;
-- native text preserved unchanged.
-
-### Visual page
-- scan renders once;
-- PaddleOCR-VL called;
-- RapidOCR called in default accuracy mode;
-- same rendered page reused.
-
-### Agreement
-- both providers agree → CROSS_VERIFIED;
-- agreement score bounded;
-- strong document clue agreement works;
-- numeric/identifier agreement works.
-
-### Conflict
-- conflicting document clue → requires_review;
-- material numeric/identifier conflict → requires_review;
-- no concatenated/fabricated text;
-- classification does not force type.
-
-### Provider resilience
-- VLM unavailable + OCR good → usable single-provider result;
-- OCR unavailable + VLM good → usable single-provider result;
-- both unavailable → unresolved;
-- provider exception deterministic;
-- provider initialized/reused.
-
-### Mixed PDF
-- visual processing only on bad page;
-- page order preserved;
-- provenance preserved.
-
-### Excel
-- no visual provider calls.
-
-### Security/resource
+Must cover:
+- strict model/service contract;
+- clean PDF bypass;
+- mixed PDF;
+- render once/reuse same image;
+- Vietnamese/Chinese quality;
+- NUL/control/replacement/symbol garbage rejection;
+- low confidence rejection;
+- `12500`;
+- `1200.50`;
+- safe thousands/decimal equivalence;
+- date mismatch;
+- identifier mismatch;
+- case-only identifier equivalence;
+- ordinary words not treated as identifiers;
+- one numeric mismatch among otherwise identical text;
+- VLM unavailable + OCR good;
+- OCR unavailable + VLM good;
+- both unavailable;
+- loopback allowed;
+- LAN/public/arbitrary DNS rejected;
+- mocked HTTP client contract;
+- malformed service response;
+- 503 unavailable;
+- render pixel limit;
+- renderer cleanup;
 - source hash unchanged;
-- page/DPI/pixel limits;
-- errors do not leak paths/content/model paths.
+- path traversal rejected;
+- safe resolved scan → COMMERCIAL_INVOICE;
+- conflict → UNKNOWN/NEEDS_REVIEW;
+- production composition;
+- vision-disabled composition does not initialize providers.
 
-### Integration
-- scan + provider agreement → COMMERCIAL_INVOICE;
-- VLM difficult-layout result + OCR verification → known type;
-- provider disagreement → UNKNOWN/NEEDS_REVIEW;
-- text-PDF regression;
-- path protections preserved.
+## Manual smoke evidence
 
----
+Separate from pytest.
 
-## 21. SMOKE / BENCHMARK
+Provide exact commands for:
+1. main Windows app install;
+2. RapidOCR smoke on synthetic local image;
+3. WSL2/Docker PaddleOCR-VL v1.6 environment;
+4. explicit local model preparation;
+5. service startup;
+6. health check;
+7. synthetic image inference;
+8. main-client call against loopback service.
 
-Developer must provide explicit local setup/smoke instructions for:
-- RapidOCR;
-- PaddleOCR-VL.
+Do not claim smoke success unless actually executed.
 
-Model preparation/download must be separate from document processing.
+## Acceptance criteria
 
-Provide a mini benchmark that reports only safe metrics:
+- Actual PaddleOCR-VL 1.6, not standard PaddleOCR.
+- Actual RapidOCR 3.x, not rapidocr-onnxruntime.
+- Native good text bypasses all visual processing.
+- Mixed PDF works per page.
+- Visual page rendered once and reused.
+- Central provider-quality gate.
+- High-signal conflicts force review.
+- No unsafe merge.
+- Loopback-only VLM transport.
+- No silent model download during document processing.
+- Source immutable.
+- No customer content leakage in logs.
+- Deterministic TASK-005 semantics unchanged.
+- Full regression suite passes.
+- Gemini #2 APPROVE.
+- Project Leader APPROVE.
 
-```text
-page
-native/visual
-vlm elapsed ms
-ocr elapsed ms
-agreement score
-verification level
-requires review
-```
+## Project Leader status
 
-Never print document text.
-
----
-
-## 22. ACCEPTANCE CRITERIA
-
-AC-01 Clean native PDF invokes neither visual provider.  
-AC-02 Visual page uses PaddleOCR-VL as primary visual parser.  
-AC-03 Default accuracy mode also uses RapidOCR as independent verifier.  
-AC-04 One page render is reused for both providers.  
-AC-05 Provider agreement produces cross-verified result.  
-AC-06 Material conflict produces review state, not forced merge.  
-AC-07 Numeric/identifier conflict can trigger review without business-field semantics.  
-AC-08 VLM unavailable can fall back to RapidOCR.  
-AC-09 OCR unavailable can retain good VLM result with single-provider provenance.  
-AC-10 both fail → unresolved.  
-AC-11 mixed PDF operates per page.  
-AC-12 classification consumes resolved text only when safe.  
-AC-13 clue/scoring semantics from TASK-005 unchanged.  
-AC-14 Excel bypasses both providers.  
-AC-15 source immutable.  
-AC-16 no automatic network/API call.  
-AC-17 no silent model download during document processing.  
-AC-18 resource limits exist.  
-AC-19 provider-specific details remain behind boundaries.  
-AC-20 full local suite passes beyond 139 baseline.
-
----
-
-## 23. OUT OF SCOPE
-
-- Invoice/Packing/Bill structured business extraction;
-- normalization;
-- matching;
-- rules;
-- HS/legal;
-- customer templates;
-- JPG/PNG upload OCR;
-- hosted AI;
-- UI;
-- training/fine-tuning.
-
----
-
-## 24. DEFINITION OF DONE
-
-- [ ] TASK-005 DONE
-- [ ] per-page quality evaluator
-- [ ] reusable in-memory renderer
-- [ ] PaddleOCR-VL provider boundary + implementation
-- [ ] RapidOCR provider boundary + implementation
-- [ ] accuracy-mode dual-provider visual path
-- [ ] deterministic reconciliation
-- [ ] conflict/review behavior
-- [ ] mixed PDF
-- [ ] provenance
-- [ ] resource limits
-- [ ] no silent model download
-- [ ] classification handoff
-- [ ] Excel bypass
-- [ ] source immutable
-- [ ] README/smoke/benchmark docs
-- [ ] all new tests pass
-- [ ] all prior 139 tests pass
-- [ ] Gemini #2 APPROVE
-- [ ] Project Leader APPROVE
-- [ ] ready for tasks/done/
-
----
-
-## 25. PROJECT LEADER DECISION
-
-Pending.
+IN_PROGRESS — implementation remains under Gemini #1 rework.
