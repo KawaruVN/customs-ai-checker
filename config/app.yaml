@@ -1,1 +1,4 @@
+app_name: "Customs AI Checker"
+environment: "development"
+log_level: "INFO"
 
