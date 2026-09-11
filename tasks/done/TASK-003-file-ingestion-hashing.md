@@ -1,6 +1,6 @@
 # TASK-003 — File Ingestion + Hashing
 
-Status: IN_PROGRESS  
+Status: DONE
 Priority: P1  
 Owner: Gemini #1 — Main Developer  
 Reviewer: Gemini #2 — Reviewer / QA  
