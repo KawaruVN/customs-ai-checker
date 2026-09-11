@@ -84,15 +84,17 @@ A configuration change must not be able to send customer page images outside the
 
 ### Model assets
 
-Normal document processing must never silently download model assets.
+Normal document processing must never trigger uncontrolled model downloads.
 
-PaddleOCR-VL service must:
-- use explicit configured local model directories;
-- validate assets at startup;
-- expose readiness in health endpoint;
-- fail deterministically if assets are missing.
+For V1, model preparation is an explicit setup operation performed before the main application enables vision. The approved local serving path may use PaddleOCR/PaddleX's prepared local cache, or a custom local pipeline configuration with explicit `model_dir` values for stricter offline deployment.
 
-Model preparation is a separate setup operation.
+Before `VISION__ENABLED=true`:
+- prepare all required PaddleOCR-VL 1.6 assets deliberately;
+- start the local full-pipeline service;
+- complete a synthetic local smoke request successfully;
+- verify normal inference still works with external network access unavailable.
+
+Missing/unprepared assets must leave the local visual provider unavailable; they must not be fetched as a side effect of a customs-document request.
 
 ## Raw provider contract
 
@@ -207,26 +209,40 @@ Dedicated error:
 
 ## Local PaddleOCR-VL service
 
-Must provide:
-- actual PaddleOCR-VL 1.6 initialization;
-- explicit local model paths;
-- startup validation;
-- `/health`;
-- `/v1/vision`;
-- strict request/response models;
-- bounded image upload;
-- deterministic 503 unavailable behavior;
-- deterministic inference-failed behavior;
-- safe logging;
-- explicit one-job or bounded concurrency suitable for prototype GPU hardware.
+The approved V1 serving implementation is the official PaddleX/PaddleOCR full-pipeline serving path, not a project-maintained imitation server.
 
-Do not use Flask-style tuple status responses in FastAPI.
+Reference startup:
+
+```text
+paddlex --serve --pipeline PaddleOCR-VL --host 127.0.0.1 --port 9090
+```
+
+Main inference endpoint:
+
+```text
+POST /layout-parsing
+```
+
+This service must execute the complete PaddleOCR-VL pipeline (layout analysis + VLM recognition), corresponding to PaddleOCR-VL 1.6/current verified v1.6 default or an explicitly pinned v1.6 pipeline configuration.
+
+Requirements:
+- local only;
+- loopback binding;
+- model preparation completed before enabling main-app vision;
+- official request/response contract validated by the main-app client;
+- bounded response size in the main client;
+- deterministic unavailable vs failed behavior;
+- safe logging;
+- project-side local inference concurrency bounded conservatively (default `1`) for workstation hardware.
+
+A custom `/health` or `/v1/vision` wrapper is not required for V1 because the project consumes the official `/layout-parsing` contract directly. Readiness is established operationally by successful service startup plus a synthetic local smoke request before vision is enabled.
 
 ## Main-app VLM client
 
 Requirements:
-- loopback-only validated endpoint;
+- loopback-only validated `/layout-parsing` endpoint;
 - short bounded timeouts;
+- bounded local inference concurrency;
 - strict response validation;
 - malformed JSON handling;
 - confidence range validation;
@@ -362,7 +378,7 @@ Do not claim smoke success unless actually executed.
 
 ## Acceptance criteria
 
-- Actual PaddleOCR-VL 1.6, not standard PaddleOCR.
+- Actual full-pipeline PaddleOCR-VL 1.6 through the verified official PaddleX/PaddleOCR serving path, not standard `PaddleOCR(...)`.
 - Actual RapidOCR 3.x, not rapidocr-onnxruntime.
 - Native good text bypasses all visual processing.
 - Mixed PDF works per page.
@@ -371,7 +387,7 @@ Do not claim smoke success unless actually executed.
 - High-signal conflicts force review.
 - No unsafe merge.
 - Loopback-only VLM transport.
-- No silent model download during document processing.
+- No model download is triggered by normal customs-document processing after the vision service is enabled.
 - Source immutable.
 - No customer content leakage in logs.
 - Deterministic TASK-005 semantics unchanged.
@@ -382,3 +398,4 @@ Do not claim smoke success unless actually executed.
 ## Project Leader status
 
 IN_PROGRESS — implementation remains under Gemini #1 rework.
+

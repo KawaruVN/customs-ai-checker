@@ -1,4 +1,5 @@
 import base64
+import threading
 from io import BytesIO
 from typing import Any
 from urllib.parse import urlparse
@@ -54,6 +55,9 @@ class LocalPaddleVlServiceClient:
                 pool=self.config.vlm_connect_timeout_seconds,
             )
         )
+        self._inference_slots = threading.BoundedSemaphore(
+            self.config.vlm_max_concurrency
+        )
 
     @staticmethod
     def _validate_loopback(endpoint: str) -> None:
@@ -78,7 +82,8 @@ class LocalPaddleVlServiceClient:
             "prettifyMarkdown": False,
         }
         try:
-            response = self.client.post(self.endpoint, json=payload)
+            with self._inference_slots:
+                response = self.client.post(self.endpoint, json=payload)
         except httpx.ConnectError as exc:
             raise DocumentVisionUnavailableError() from exc
         except httpx.TimeoutException as exc:
@@ -119,3 +124,4 @@ class LocalPaddleVlServiceClient:
             confidence=None,
             structured_content=structured or None,
         )
+

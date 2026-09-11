@@ -31,7 +31,9 @@ Do not install both CPU and GPU PaddlePaddle in the same environment.
 
 ## Explicit model preparation
 
-The official pipeline can download its models on first use. Do that deliberately during setup, before enabling TASK-005A in the main application.
+The official pipeline can obtain missing models during setup. Do that deliberately before enabling TASK-005A in the main application. A customs-document request must never be the event that causes model acquisition.
+
+For the V1 prototype, the official locally prepared PaddleOCR/PaddleX model cache is acceptable. For stricter offline production, use a pinned custom PaddleX pipeline configuration with explicit local `model_dir` values or an official offline Docker image.
 
 Use a synthetic/local test image and run:
 
@@ -44,7 +46,7 @@ paddleocr doc_parser \
 
 Wait for all required models to finish downloading and verify the command succeeds.
 
-After model preparation, disconnecting Internet access must not prevent normal inference with already cached assets. For a stricter production/offline deployment, use PaddleOCR's official offline Docker images and pin the image version instead of `latest`.
+After model preparation, start the service and complete the synthetic smoke request below. Then repeat the smoke with external network access unavailable. Only after that verification should `VISION__ENABLED=true` be set in the Windows application.
 
 ## Install serving plugin
 
@@ -122,3 +124,15 @@ rapidocr check
 ```
 
 RapidOCR 3.9+ uses PP-OCRv6 small detection/recognition by default and runs locally through ONNX Runtime in this project.
+
+
+
+## Concurrency
+
+The Windows client defaults to:
+
+```text
+VISION__VLM_MAX_CONCURRENCY=1
+```
+
+This deliberately serializes local PaddleOCR-VL inference from this application instance. It is suitable for the current workstation prototype and reduces GPU-memory pressure. Raise it only after measured VRAM/latency benchmarks demonstrate that the hardware can sustain parallel requests.

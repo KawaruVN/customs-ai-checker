@@ -59,10 +59,11 @@ class VisionSettingsConfig(BaseModel):
     min_confidence_threshold: float = Field(default=0.55, ge=0.0, le=1.0)
     min_soft_text_overlap: float = Field(default=0.35, ge=0.0, le=1.0)
 
-    vlm_local_endpoint: str = "http://127.0.0.1:9090/v1/vision"
+    vlm_local_endpoint: str = "http://127.0.0.1:9090/layout-parsing"
     vlm_connect_timeout_seconds: float = Field(default=2.0, gt=0.0, le=30.0)
     vlm_read_timeout_seconds: float = Field(default=60.0, gt=0.0, le=300.0)
     vlm_max_response_bytes: int = Field(default=5_000_000, ge=1_024, le=50_000_000)
+    vlm_max_concurrency: int = Field(default=1, ge=1, le=4)
 
     @field_validator("vlm_local_endpoint")
     @classmethod
@@ -129,3 +130,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

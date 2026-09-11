@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import pytest
@@ -24,6 +23,7 @@ def isolate_envs(monkeypatch):
         "VISION__ACCURACY_MODE",
         "VISION__RENDER_DPI",
         "VISION__VLM_LOCAL_ENDPOINT",
+        "VISION__VLM_MAX_CONCURRENCY",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -182,3 +182,11 @@ def test_invalid_vision_bounds_rejected(isolate_envs, monkeypatch):
     monkeypatch.setenv("VISION__RENDER_DPI", "9999")
     with pytest.raises(ValidationError):
         Settings(_env_file=None)
+
+
+
+def test_vision_concurrency_bound_rejected(isolate_envs, monkeypatch):
+    monkeypatch.setenv("VISION__VLM_MAX_CONCURRENCY", "0")
+    with pytest.raises(ValidationError) as exc:
+        Settings(_env_file=None)
+    assert "vlm_max_concurrency" in str(exc.value)

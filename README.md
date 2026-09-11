@@ -189,9 +189,9 @@ Không commit:
 
 ## 8. Current Status
 
-Current phase: `V1 — Foundation`
+Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-003 — File Ingestion + Hashing`
+Current task: `TASK-005A — Scanned PDF Local Document Vision + OCR Verification`
 
 ## Local parser layer
 
@@ -209,3 +209,17 @@ Classification evaluates technical parsed content deterministically against conf
 - Resolves conflicts conservatively: weak or conflicting evidence securely defaults to `UNKNOWN` (needs review).
 - `OTHER` is reserved for explicit manual classification, and is never inferred merely by the absence of clues.
 - Generic references such as `PO NO`, `FORM E`, and `C/O` are supporting clues only and cannot classify a document by themselves.
+
+### Local scanned-PDF vision layer
+
+TASK-005A adds an accuracy-first visual fallback for PDF pages whose native text is unusable.
+
+- Clean/native PDF pages keep the existing `pypdf` text and do not invoke visual providers.
+- Visual pages are rendered once in memory and reused by both providers.
+- PaddleOCR-VL 1.6 runs as the primary local full-pipeline document parser through the official PaddleX loopback serving API.
+- RapidOCR 3.x runs locally as an independent literal OCR verifier/fallback.
+- Provider output is accepted only after a shared text-quality gate.
+- Material numeric/date/identifier/document-clue conflicts become `NEEDS_REVIEW`; outputs are never concatenated to manufacture agreement.
+- The VLM endpoint is restricted to loopback hosts and local inference concurrency defaults to one request.
+- Normal document processing uses no hosted AI API.
+
