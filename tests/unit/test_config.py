@@ -1,3 +1,4 @@
+
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,10 @@ def isolate_envs(monkeypatch):
         "MAX_UPLOAD_SIZE_MB",
         "UPLOAD_ROOT",
         "DB_PATH",
+        "VISION__ENABLED",
+        "VISION__ACCURACY_MODE",
+        "VISION__RENDER_DPI",
+        "VISION__VLM_LOCAL_ENDPOINT",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -155,3 +160,25 @@ def test_absolute_runtime_paths_are_preserved(isolate_envs, monkeypatch, tmp_pat
 
     assert settings.upload_root == upload_root
     assert settings.db_path == db_path
+
+
+def test_nested_vision_env_override(isolate_envs, monkeypatch):
+    monkeypatch.setenv("VISION__ENABLED", "true")
+    monkeypatch.setenv("VISION__RENDER_DPI", "300")
+    monkeypatch.setenv("VISION__VLM_LOCAL_ENDPOINT", "http://localhost:9090/layout-parsing")
+    configured = Settings(_env_file=None)
+    assert configured.vision.enabled is True
+    assert configured.vision.render_dpi == 300
+    assert configured.vision.vlm_local_endpoint == "http://localhost:9090/layout-parsing"
+
+
+def test_non_loopback_vision_endpoint_rejected(isolate_envs, monkeypatch):
+    monkeypatch.setenv("VISION__VLM_LOCAL_ENDPOINT", "http://192.168.1.2:9090/layout-parsing")
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)
+
+
+def test_invalid_vision_bounds_rejected(isolate_envs, monkeypatch):
+    monkeypatch.setenv("VISION__RENDER_DPI", "9999")
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)

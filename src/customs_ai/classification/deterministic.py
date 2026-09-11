@@ -1,3 +1,4 @@
+
 import re
 
 from customs_ai.classification.config import DocumentClassificationConfig
@@ -8,6 +9,7 @@ from customs_ai.classification.models import (
 )
 from customs_ai.classification.text_utils import build_clue_regex, normalize_text
 from customs_ai.parsers.models import ParsedDocument, ParsedPdfDocument, ParsedWorkbook
+from customs_ai.vision.models import ResolvedPdfDocument
 
 
 class DeterministicClassifier:
@@ -31,7 +33,7 @@ class DeterministicClassifier:
                 )
 
     def classify(
-        self, parsed_doc: ParsedDocument, filename: str | None = None
+        self, parsed_doc: ParsedDocument | ResolvedPdfDocument, filename: str | None = None
     ) -> DocumentClassificationResult:
         # Note: filename is explicitly accepted for signature compatibility but ignored for scoring.
         scores: dict[str, float] = {dt.value: 0.0 for dt in DocumentType}
@@ -66,7 +68,7 @@ class DeterministicClassifier:
                         )
 
         # 1. Evaluate PDF Text
-        if isinstance(parsed_doc, ParsedPdfDocument):
+        if isinstance(parsed_doc, (ParsedPdfDocument, ResolvedPdfDocument)):
             for page in parsed_doc.pages:
                 _evaluate_text(page.text, page=page.page)
 

@@ -4,3 +4,20 @@ log_level: "INFO"
 max_upload_size_mb: 50
 upload_root: "data/uploads"
 db_path: "data/app.db"
+
+vision:
+  enabled: false
+  accuracy_mode: true
+  render_dpi: 200
+  max_render_pixels: 16000000
+  max_visual_pages: 50
+  min_meaningful_chars: 12
+  max_control_ratio: 0.02
+  max_replacement_ratio: 0.01
+  min_meaningful_ratio: 0.45
+  min_confidence_threshold: 0.55
+  min_soft_text_overlap: 0.35
+  vlm_local_endpoint: "http://127.0.0.1:9090/layout-parsing"
+  vlm_connect_timeout_seconds: 2.0
+  vlm_read_timeout_seconds: 60.0
+  vlm_max_response_bytes: 5000000

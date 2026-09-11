@@ -1,13 +1,9 @@
-from pathlib import Path
-
-from customs_ai.config import settings
+from customs_ai.application.paths import resolve_source_path
 from customs_ai.ingestion.enums import ProcessingStatus
 from customs_ai.parsers.errors import (
     ParserError,
     ParserFailedError,
     SourceDocumentNotFoundError,
-    SourceFileNotFoundError,
-    SourceFilePathInvalidError,
 )
 from customs_ai.parsers.models import ParsedDocument, ParsedPdfDocument, ParsedWorkbook
 from customs_ai.parsers.router import ParserRouter
@@ -23,27 +19,12 @@ class DocumentParsingService:
         self.repository = repository
         self.router = router or ParserRouter()
 
-    @staticmethod
-    def _resolve_source_path(stored_path: str) -> Path:
-        root = settings.upload_root.resolve()
-        candidate = Path(stored_path)
-        if not candidate.is_absolute():
-            candidate = root / candidate
-        resolved = candidate.resolve()
-        try:
-            resolved.relative_to(root)
-        except ValueError as exc:
-            raise SourceFilePathInvalidError() from exc
-        if not resolved.is_file():
-            raise SourceFileNotFoundError()
-        return resolved
-
     def parse_document(self, document_id: str) -> ParsedDocument:
         source_document = self.repository.get_by_document_id(document_id)
         if source_document is None:
             raise SourceDocumentNotFoundError()
 
-        source_path = self._resolve_source_path(source_document.stored_path)
+        source_path = resolve_source_path(source_document.stored_path)
         parser = self.router.get_parser(source_document.file_type)
 
         try:

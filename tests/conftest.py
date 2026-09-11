@@ -1,3 +1,4 @@
+
 import pytest
 
 from customs_ai.config import settings
@@ -15,6 +16,10 @@ def isolate_runtime(tmp_path, monkeypatch):
         "MAX_UPLOAD_SIZE_MB",
         "UPLOAD_ROOT",
         "DB_PATH",
+        "VISION__ENABLED",
+        "VISION__ACCURACY_MODE",
+        "VISION__RENDER_DPI",
+        "VISION__VLM_LOCAL_ENDPOINT",
     ):
         monkeypatch.delenv(name, raising=False)
 
