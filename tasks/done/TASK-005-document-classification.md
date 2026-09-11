@@ -1,13 +1,13 @@
-# TASK-005 — Document Classification
+# TASK-005 â€” Document Classification
 
-Status: IN_PROGRESS  
+Status: DONE  
 Priority: P1  
-Owner: Gemini #1 — Main Developer  
-Reviewer: Gemini #2 — Reviewer / QA  
+Owner: Gemini #1 â€” Main Developer  
+Reviewer: Gemini #2 â€” Reviewer / QA  
 Created: 2026-09-11  
 Updated: 2026-09-11  
 Target Version: V1  
-Dependencies: TASK-001 — Project Foundation (DONE); TASK-002 — Canonical Data Schema (DONE); TASK-003 — File Ingestion + Hashing (DONE); TASK-004 — Local PDF / Excel Parsers (DONE)  
+Dependencies: TASK-001 â€” Project Foundation (DONE); TASK-002 â€” Canonical Data Schema (DONE); TASK-003 â€” File Ingestion + Hashing (DONE); TASK-004 â€” Local PDF / Excel Parsers (DONE)  
 Related ADR: None
 
 ---
@@ -140,8 +140,8 @@ The classification service retrieves:
 
 ```text
 SourceDocument
-→ parsed technical content from TASK-004
-→ deterministic classifier
+â†’ parsed technical content from TASK-004
+â†’ deterministic classifier
 ```
 
 Supported parsed inputs in TASK-005:
@@ -201,7 +201,7 @@ Weak result:
 
 ## 7. FUNCTIONAL REQUIREMENTS
 
-### FR-01 — DocumentType enum
+### FR-01 â€” DocumentType enum
 
 Must include exactly or equivalently:
 
@@ -220,7 +220,7 @@ OTHER
 UNKNOWN
 ```
 
-### FR-02 — Classification result
+### FR-02 â€” Classification result
 
 Typed result with:
 
@@ -236,7 +236,7 @@ evidence[]
 
 Extra fields forbidden.
 
-### FR-03 — Evidence provenance
+### FR-03 â€” Evidence provenance
 
 Each evidence item should preserve enough technical provenance to find the clue:
 
@@ -250,7 +250,7 @@ weight / score contribution
 
 Do not invent page/sheet/cell coordinates.
 
-### FR-04 — Deterministic clue configuration
+### FR-04 â€” Deterministic clue configuration
 
 Keep classification clue definitions external/configurable where practical, preferably under:
 
@@ -262,7 +262,7 @@ or a similarly clear versioned configuration.
 
 Avoid scattering document-specific keyword lists across application code.
 
-### FR-05 — Initial deterministic clue families
+### FR-05 â€” Initial deterministic clue families
 
 At minimum support meaningful clues for:
 
@@ -270,15 +270,15 @@ At minimum support meaningful clues for:
 Examples:
 - COMMERCIAL INVOICE
 - INVOICE NO / INVOICE NUMBER
-- 发票 / 商业发票
-- HÓA ĐƠN / HÓA ĐƠN THƯƠNG MẠI
+- å‘ç¥¨ / å•†ä¸šå‘ç¥¨
+- HÃ“A ÄÆ N / HÃ“A ÄÆ N THÆ¯Æ NG Máº I
 - UNIT PRICE
 - AMOUNT / TOTAL AMOUNT
 
 #### Packing List
 - PACKING LIST
-- 装箱单
-- PHIẾU ĐÓNG GÓI / BẢNG KÊ ĐÓNG GÓI
+- è£…ç®±å•
+- PHIáº¾U ÄÃ“NG GÃ“I / Báº¢NG KÃŠ ÄÃ“NG GÃ“I
 - GROSS WEIGHT
 - NET WEIGHT
 - PACKAGE / CARTON
@@ -286,7 +286,7 @@ Examples:
 #### Bill of Lading
 - BILL OF LADING
 - B/L
-- 提单
+- æå•
 - SHIPPER
 - CONSIGNEE
 - VESSEL / VOYAGE
@@ -295,14 +295,14 @@ Examples:
 #### Air Waybill
 - AIR WAYBILL
 - AWB
-- 航空运单
+- èˆªç©ºè¿å•
 - FLIGHT
 - AIRPORT OF DEPARTURE / DESTINATION
 
 #### Customs Declaration
 - CUSTOMS DECLARATION
-- TỜ KHAI HẢI QUAN
-- 海关申报 / 报关单
+- Tá»œ KHAI Háº¢I QUAN
+- æµ·å…³ç”³æŠ¥ / æŠ¥å…³å•
 - DECLARATION NO
 - HS CODE
 - CUSTOMS OFFICE
@@ -310,39 +310,39 @@ Examples:
 #### Contract
 - CONTRACT
 - SALES CONTRACT / PURCHASE CONTRACT
-- 合同
-- HỢP ĐỒNG
+- åˆåŒ
+- Há»¢P Äá»’NG
 - PARTY A / PARTY B or equivalent
 
 #### Purchase Order
 - PURCHASE ORDER
 - PO NO
-- 采购订单
-- ĐƠN ĐẶT HÀNG
+- é‡‡è´­è®¢å•
+- ÄÆ N Äáº¶T HÃ€NG
 
 #### Certificate of Origin
 - CERTIFICATE OF ORIGIN
 - C/O
-- 原产地证
-- GIẤY CHỨNG NHẬN XUẤT XỨ
+- åŽŸäº§åœ°è¯
+- GIáº¤Y CHá»¨NG NHáº¬N XUáº¤T Xá»¨
 - FORM E / FORM D / etc. only as supporting clues, not sole decisive clue
 
 #### Catalogue
 - CATALOGUE / CATALOG
-- 产品目录
-- DANH MỤC SẢN PHẨM
+- äº§å“ç›®å½•
+- DANH Má»¤C Sáº¢N PHáº¨M
 - product-specification-like content without transactional document structure
 
 #### Specification
 - SPECIFICATION
 - TECHNICAL SPECIFICATION
-- 技术规格
-- THÔNG SỐ KỸ THUẬT
+- æŠ€æœ¯è§„æ ¼
+- THÃ”NG Sá» Ká»¸ THUáº¬T
 - model/parameter/property patterns
 
 The actual config must be conservative and tested against cross-type collisions.
 
-### FR-06 — Strong vs supporting clues
+### FR-06 â€” Strong vs supporting clues
 
 The classifier must distinguish strong title/header clues from generic supporting terms.
 
@@ -353,7 +353,7 @@ Generic terms like:
 `QUANTITY`, `DATE`, `ADDRESS`, `DESCRIPTION`
 must never classify a document on their own.
 
-### FR-07 — Multiple clues
+### FR-07 â€” Multiple clues
 
 A non-UNKNOWN result should normally require:
 - one strong clue; or
@@ -361,7 +361,7 @@ A non-UNKNOWN result should normally require:
 
 A single generic keyword must not be enough.
 
-### FR-08 — Confidence
+### FR-08 â€” Confidence
 
 Confidence must be deterministic and documented.
 
@@ -372,7 +372,7 @@ Requirements:
 - weak evidence stays below threshold;
 - no artificial 0.99/1.0 solely from one generic word.
 
-### FR-09 — Conflict
+### FR-09 â€” Conflict
 
 If two incompatible document types receive similarly strong evidence and the margin is below a documented minimum:
 
@@ -383,7 +383,7 @@ processing_status = NEEDS_REVIEW
 
 Do not arbitrarily choose first enum/order.
 
-### FR-10 — Filename
+### FR-10 â€” Filename
 
 Filename may not be sole evidence.
 
@@ -393,25 +393,25 @@ If used as weak metadata:
 - weight must be lower than content evidence;
 - filename-only result remains UNKNOWN.
 
-### FR-11 — PDF flattening
+### FR-11 â€” PDF flattening
 
 Classifier may inspect normalized lines/tokens from all parsed pages, but evidence must retain page provenance.
 
 Do not remove page boundaries from evidence.
 
-### FR-12 — Excel flattening
+### FR-12 â€” Excel flattening
 
 Classifier may inspect populated cell strings, but evidence must retain sheet + coordinate provenance.
 
 Do not classify based on workbook/sheet filename/name alone without content evidence.
 
-### FR-13 — Parsing dependency
+### FR-13 â€” Parsing dependency
 
 Classification application service may call/reuse `DocumentParsingService`.
 
 It must not reimplement PDF/XLS/XLSX parsing.
 
-### FR-14 — SourceDocument persistence
+### FR-14 â€” SourceDocument persistence
 
 Repository must support a classification metadata update behind its boundary.
 
@@ -433,7 +433,7 @@ processing_status = NEEDS_REVIEW
 
 Parser metadata must remain unchanged.
 
-### FR-15 — Failure behavior
+### FR-15 â€” Failure behavior
 
 If parser/classifier/repository update fails:
 - do not falsely persist CLASSIFIED;
@@ -441,11 +441,11 @@ If parser/classifier/repository update fails:
 - raise deterministic application error;
 - do not expose full document text or absolute filesystem path.
 
-### FR-16 — Idempotence
+### FR-16 â€” Idempotence
 
 Running classification repeatedly on unchanged parsed content/config must produce the same classification output and must not create duplicate side effects.
 
-### FR-17 — No semantic extraction
+### FR-17 â€” No semantic extraction
 
 Classification evidence may mention matched phrases but must not create canonical invoice numbers, totals, parties, item lines, etc.
 
@@ -622,7 +622,7 @@ No extraction/normalization/matching/rules/AI/network scope creep.
 
 ## 15. TEST REQUIREMENTS
 
-### Unit — Config/models/scoring
+### Unit â€” Config/models/scoring
 - enum coverage;
 - strict model validation;
 - confidence bounds;
@@ -663,7 +663,7 @@ Use synthetic multilingual samples where useful.
 ### Application/repository
 - SourceDocument lookup;
 - successful metadata persistence;
-- UNKNOWN → NEEDS_REVIEW;
+- UNKNOWN â†’ NEEDS_REVIEW;
 - parser metadata preserved;
 - repository failure no false success;
 - idempotent repeat.
@@ -691,8 +691,8 @@ Examples may use:
 ```text
 COMMERCIAL INVOICE
 Invoice No: INV-TEST-001
-测试发票
-Hóa đơn thử nghiệm
+æµ‹è¯•å‘ç¥¨
+HÃ³a Ä‘Æ¡n thá»­ nghiá»‡m
 ```
 
 No real customer documents or identities.
@@ -773,11 +773,11 @@ TASK-006 Invoice Extraction depends on TASK-005 and TASK-004.
 - [ ] all V1 document types represented
 - [ ] deterministic config-backed classifier implemented
 - [ ] confidence deterministic and bounded
-- [ ] weak/conflicting evidence → UNKNOWN
+- [ ] weak/conflicting evidence â†’ UNKNOWN
 - [ ] filename not sole evidence
 - [ ] PDF/Excel evidence provenance retained
 - [ ] SourceDocument classification metadata persisted
-- [ ] UNKNOWN → NEEDS_REVIEW
+- [ ] UNKNOWN â†’ NEEDS_REVIEW
 - [ ] parser metadata preserved
 - [ ] no extraction/AI/network scope creep
 - [ ] all TASK-005 tests pass
@@ -806,4 +806,4 @@ Gemini #2 updates during review.
 
 ## 25. PROJECT LEADER DECISION
 
-Pending.
+APPROVED — Local validation: 139/139 passed. Gemini #2: PASS / APPROVE. Project Leader: APPROVE.
