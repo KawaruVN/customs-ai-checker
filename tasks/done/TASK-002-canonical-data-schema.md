@@ -1,13 +1,13 @@
-# TASK-002 — Canonical Data Schema
+﻿# TASK-002 â€” Canonical Data Schema
 
-Status: IN_PROGRESS  
+Status: DONE  
 Priority: P1  
-Owner: Gemini #1 — Main Developer  
-Reviewer: Gemini #2 — Reviewer / QA  
+Owner: Gemini #1 â€” Main Developer  
+Reviewer: Gemini #2 â€” Reviewer / QA  
 Created: 2026-09-11  
 Updated: 2026-09-11  
 Target Version: V1  
-Dependencies: TASK-001 — Project Foundation (DONE)  
+Dependencies: TASK-001 â€” Project Foundation (DONE)  
 Related ADR: None
 
 ---
@@ -141,7 +141,7 @@ The schema document and Python implementation MUST agree.
 
 ## 7. FUNCTIONAL REQUIREMENTS
 
-### FR-01 — Canonical field provenance
+### FR-01 â€” Canonical field provenance
 
 Every canonical business field that originates from extraction/inference must be able to preserve:
 
@@ -160,7 +160,7 @@ confidence (optional)
 
 Equivalent decomposition into nested provenance/location models is allowed if the information is not lost.
 
-### FR-02 — Raw value preservation
+### FR-02 â€” Raw value preservation
 
 Normalization-ready fields MUST NOT replace or destroy `raw_value`.
 
@@ -178,7 +178,7 @@ Example concept:
 
 Exact JSON serialization may differ as long as semantics are documented and deterministic.
 
-### FR-03 — Extraction vs inference
+### FR-03 â€” Extraction vs inference
 
 At minimum, the schema MUST support the following origins:
 
@@ -192,13 +192,13 @@ MANUAL
 
 The Developer MUST NOT silently label an inferred value as extracted.
 
-### FR-04 — Missing values
+### FR-04 â€” Missing values
 
 A field that does not exist in the source MUST be representable as missing/`None` without fabricating a `CanonicalField` value.
 
 Missing data MUST NOT be auto-converted into inferred data by the schema layer.
 
-### FR-05 — Extracted provenance invariant
+### FR-05 â€” Extracted provenance invariant
 
 For an `EXTRACTED` canonical field, the model SHOULD require enough provenance to establish that the value came from a real source document.
 
@@ -211,7 +211,7 @@ raw_value is present
 
 If the Developer chooses a different invariant, it must be explicitly justified in `docs/DATA_SCHEMA.md` and in the Completion Report.
 
-### FR-06 — Confidence
+### FR-06 â€” Confidence
 
 If confidence is present, it MUST validate to the inclusive range:
 
@@ -221,7 +221,7 @@ If confidence is present, it MUST validate to the inclusive range:
 
 Confidence may remain optional because deterministic/manual values may not need it.
 
-### FR-07 — Source location
+### FR-07 â€” Source location
 
 The schema MUST support:
 
@@ -233,7 +233,7 @@ Optional bounding box when available
 
 The schema MUST NOT require a bounding box for V1.
 
-### FR-08 — Canonical Shipment
+### FR-08 â€” Canonical Shipment
 
 A `CanonicalShipment` aggregate MUST support zero-to-many:
 
@@ -246,7 +246,7 @@ CustomsDeclaration
 
 It MUST NOT assume `1 Shipment = 1 Invoice`.
 
-### FR-09 — Invoice
+### FR-09 â€” Invoice
 
 Invoice schema MUST support at least these optional business fields when present:
 
@@ -287,7 +287,7 @@ package_information
 
 Not every field is required.
 
-### FR-10 — Packing List
+### FR-10 â€” Packing List
 
 PackingList MUST support at least:
 
@@ -319,7 +319,7 @@ gross_weight
 net_weight
 ```
 
-### FR-11 — Transport document
+### FR-11 â€” Transport document
 
 TransportDocument MUST support Bill of Lading / Sea Waybill / Air Waybill use cases and at least:
 
@@ -348,7 +348,7 @@ freight_term
 
 Fields irrelevant to a specific transport mode remain optional.
 
-### FR-12 — Customs declaration
+### FR-12 â€” Customs declaration
 
 CustomsDeclaration MUST support at least:
 
@@ -384,7 +384,7 @@ permit/policy reference(s) if represented
 
 This is a data representation only. TASK-002 MUST NOT decide whether an HS code, tax rate, permit, or legal requirement is correct.
 
-### FR-13 — Party
+### FR-13 â€” Party
 
 Party MUST support at least:
 
@@ -397,7 +397,7 @@ country/origin identifier when present
 
 No assumption may be made that all documents contain all party fields.
 
-### FR-14 — Evidence
+### FR-14 â€” Evidence
 
 Define an `Evidence` representation usable later by CheckResult/reporting modules. At minimum it must be able to carry:
 
@@ -416,17 +416,17 @@ extraction_id (optional)
 
 TASK-002 does not implement rule execution or evidence generation logic.
 
-### FR-15 — Numeric precision
+### FR-15 â€” Numeric precision
 
 Business-critical decimal numbers MUST use `Decimal` (or an equally precise decimal representation), not Python `float`, for normalized monetary/value/quantity/weight values.
 
 Float may be used for confidence because it is a bounded score, not a financial quantity.
 
-### FR-16 — Dates
+### FR-16 â€” Dates
 
 Normalized dates SHOULD use Python `date` (and `datetime` only where time is materially present), while raw source text remains preserved by canonical field provenance.
 
-### FR-17 — String identifiers
+### FR-17 â€” String identifiers
 
 These values MUST NOT be modeled as integers merely because they contain digits:
 
@@ -441,13 +441,13 @@ country/origin code
 item/part/model identifiers
 ```
 
-### FR-18 — Extra fields
+### FR-18 â€” Extra fields
 
 Canonical domain models SHOULD reject unknown top-level/model fields (`extra="forbid"` or equivalent) so customer-layout leakage and accidental schema drift are detected early.
 
 If the Developer chooses not to use strict extra-field validation for a specific model, that exception must be documented and justified.
 
-### FR-19 — Schema version
+### FR-19 â€” Schema version
 
 The canonical aggregate MUST expose a schema version identifier, initially:
 
@@ -457,7 +457,7 @@ The canonical aggregate MUST expose a schema version identifier, initially:
 
 The version is a data-contract version, not the application package version.
 
-### FR-20 — JSON / Pydantic schema generation
+### FR-20 â€” JSON / Pydantic schema generation
 
 The canonical models MUST support deterministic Pydantic validation and JSON serialization. `CanonicalShipment.model_json_schema()` or an equivalent top-level schema generation path MUST work without error.
 
@@ -586,79 +586,79 @@ Developer and Reviewer MUST consider at least:
 
 ## 14. ACCEPTANCE CRITERIA
 
-### AC-01 — Documentation
+### AC-01 â€” Documentation
 
 Given the completed implementation  
 When `docs/DATA_SCHEMA.md` is read  
 Then it documents the canonical field/provenance contract, document models, missing-value semantics, extraction-vs-inference distinction, numeric precision approach, and schema version.
 
-### AC-02 — Provenance preservation
+### AC-02 â€” Provenance preservation
 
 Given an extracted field with raw text and normalized value  
 When it is validated and serialized  
 Then both raw and normalized values remain available together with the extracted origin and source document reference.
 
-### AC-03 — Inference distinction
+### AC-03 â€” Inference distinction
 
 Given an inferred field  
 When it is serialized  
 Then its origin remains explicitly `INFERRED` and cannot be confused with `EXTRACTED`.
 
-### AC-04 — Missing data
+### AC-04 â€” Missing data
 
 Given an Invoice without `insurance` or `payment_term`  
 When the Invoice is validated  
 Then validation succeeds without fabricating values.
 
-### AC-05 — Multiple documents
+### AC-05 â€” Multiple documents
 
 Given a CanonicalShipment with at least two Invoices and two PackingLists  
 When the aggregate is validated  
 Then validation succeeds and all document objects remain distinct.
 
-### AC-06 — Core document models
+### AC-06 â€” Core document models
 
 Given minimal valid examples of Invoice, PackingList, TransportDocument, and CustomsDeclaration  
 When each is validated  
 Then each passes using the documented canonical schema.
 
-### AC-07 — Invalid confidence
+### AC-07 â€” Invalid confidence
 
 Given confidence `< 0` or `> 1`  
 When a canonical field is validated  
 Then validation fails.
 
-### AC-08 — Decimal precision
+### AC-08 â€” Decimal precision
 
 Given a business numeric value requiring decimal precision  
 When stored in the normalized canonical form  
 Then the implementation does not rely on binary float for that value.
 
-### AC-09 — String identifiers
+### AC-09 â€” String identifiers
 
 Given an HS code such as `01012100`  
 When validated/serialized  
 Then the leading zero is preserved.
 
-### AC-10 — Extra field protection
+### AC-10 â€” Extra field protection
 
 Given an undeclared customer/layout-specific field is injected into a strict canonical model  
 When validated  
 Then validation fails rather than silently accepting schema drift.
 
-### AC-11 — JSON schema
+### AC-11 â€” JSON schema
 
 Given the top-level canonical model  
 When Pydantic JSON Schema generation is requested  
 Then generation succeeds without error.
 
-### AC-12 — Regression
+### AC-12 â€” Regression
 
 Given the repository after TASK-002 implementation  
 When the complete pytest suite is run  
 Then all TASK-001 and TASK-002 tests pass.
 
-### AC-13 — Scope
+### AC-13 â€” Scope
 
 Given the final diff  
 When reviewed  
@@ -758,7 +758,7 @@ New paid services: NO
 Depends on:
 
 ```text
-TASK-001 — Project Foundation (DONE)
+TASK-001 â€” Project Foundation (DONE)
 ```
 
 Downstream tasks expected to depend on TASK-002 include ingestion/parsers/extraction/normalization/matching/checking modules.
