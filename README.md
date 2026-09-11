@@ -191,7 +191,7 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006 — Invoice Extraction` (not started)
+Current task: `TASK-006 — Invoice Extraction` (IN_PROGRESS)
 
 ## Local parser layer
 
