@@ -182,14 +182,14 @@ Current:
 
 ```text
 TASK-006A — DONE (Merged via PR #1, commit 02a748e)
-TASK-006B — IN_PROGRESS
+TASK-006B — DONE (Merged via PR #2, commit 29c4da2)
 TASK-006C — TODO
 TASK-006D — TODO
 TASK-006E — TODO
 TASK-006F — TODO
 ```
 
-Current authoritative baseline for TASK-006B: 207 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1).
+Current authoritative baseline for TASK-006C: 249 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 After each child is approved:
 
@@ -208,7 +208,7 @@ Do not carry rejected code from the previous monolithic TASK-006 rounds into a c
 TASK-006 is DONE only when:
 
 - [x] TASK-006A DONE
-- [ ] TASK-006B DONE
+- [x] TASK-006B DONE
 - [ ] TASK-006C DONE
 - [ ] TASK-006D DONE
 - [ ] TASK-006E DONE

@@ -143,11 +143,14 @@ Phụ trách kiến trúc, spec và duyệt kỹ thuật.
 
 ### Antigravity — Main Developer
 
-Phụ trách implementation, tests, documentation.
+Phụ trách implementation, tests, documentation (mặc định).
 
 ### Codex — Technical Reviewer / QA
 
-Phụ trách review edge cases, security, cost.
+Phụ trách review edge cases, security, cost (mặc định).
+
+> [!NOTE]
+> **Thử nghiệm hoán đổi vai trò cho TASK-006C:** Để đánh giá chéo hiệu quả phát triển và kiểm thử độc lập, Codex sẽ đảm nhiệm vai trò Main Developer (phụ trách implementation và unit tests), và Antigravity đảm nhiệm vai trò Technical Reviewer / QA (phụ trách review độc lập, audit probes và verification).
 
 ---
 
@@ -158,11 +161,11 @@ Project Leader writes Task
         ↓
 tasks/todo/
         ↓
-Antigravity implements
+Main Developer implements
         ↓
 tasks/in_progress/
         ↓
-Codex reviews
+Technical Reviewer reviews
         ↓
 APPROVE or REQUEST CHANGES
         ↓
@@ -191,9 +194,17 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006B — Deterministic Invoice Headers` (TODO; parent epic: TASK-006)
+Current task: `TASK-006C — Invoice Item Tables` (TODO; parent epic: TASK-006; Codex — Main Developer, Antigravity — Technical Reviewer)
 
 Recently completed:
+- `TASK-006B — Deterministic Invoice Headers` (DONE — Merged via PR #2, commit `29c4da2`)
+  - Deterministic invoice header and party extraction from `ParsedPdfDocument`, safe `ResolvedPdfDocument`, and `ParsedWorkbook`.
+  - Strict party role separation for seller, buyer, and ship-to (MASTER_SPEC.md:499).
+  - Exact source evidence: raw value, casing, page/sheet/cell provenance.
+  - Conservative formula policy: formula cells and expression text are opaque, never serve as label sources, and formulas as values trigger `UNRESOLVED_FORMULA_FIELD` with `NEEDS_REVIEW`.
+  - Strict rejection of boolean and native time cells for numeric/date fields without invalid coercion.
+  - Inline value span parsing (amount, date, zero, negative).
+  - Test suite: 42 new focused tests, 249 full-suite tests passed, 2 warnings (Python 3.13.14, pytest 9.1.1).
 - `TASK-006A — Extraction Foundation` (DONE — Merged via PR #1)
   - Primitives: `ExtractionStatus`, typed `ExtractionIssue`, provider-neutral `ExtractionCandidate`.
   - Configuration: `config/invoice_extraction.yaml` covering 17 approved header paths and 14 item paths with strict EN/VI/ZH aliases and party role separation (MASTER_SPEC.md:499).
@@ -229,4 +240,3 @@ TASK-005A adds an accuracy-first visual fallback for PDF pages whose native text
 - Material numeric/date/identifier/document-clue conflicts become `NEEDS_REVIEW`; outputs are never concatenated to manufacture agreement.
 - The VLM endpoint is restricted to loopback hosts and local inference concurrency defaults to one request.
 - Normal document processing uses no hosted AI API.
-
