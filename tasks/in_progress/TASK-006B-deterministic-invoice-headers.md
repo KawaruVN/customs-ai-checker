@@ -1,9 +1,14 @@
 # TASK-006B — Deterministic Invoice Headers
 
-Status: TODO  
+Status: IN_PROGRESS  
 Priority: P1  
 Parent: TASK-006  
-Dependencies: TASK-006A DONE
+Owner: Antigravity — Main Developer  
+Reviewer: Codex — Independent Technical Reviewer / QA  
+Created: 2026-09-11  
+Updated: 2026-10-28  
+Dependencies: TASK-006A DONE  
+Baseline: 207 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1)
 
 ## Objective
 
