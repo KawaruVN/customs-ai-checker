@@ -4,7 +4,7 @@ from typing import Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from customs_ai.domain.schema import Invoice
+from customs_ai.domain.schema import Invoice, InvoiceItem
 from customs_ai.extraction.enums import ExtractionStatus
 
 CandidateTypedValue = Union[bool, date, datetime, time, Decimal, int, float, str, None]
@@ -47,6 +47,17 @@ class InvoiceHeaderExtractionResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     invoice: Invoice
+    status: ExtractionStatus
+    issues: list[ExtractionIssue] = Field(default_factory=list)
+    candidates: list[ExtractionCandidate] = Field(default_factory=list)
+
+
+class InvoiceItemExtractionResult(BaseModel):
+    """Canonical item rows with explicit review status and source evidence."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[InvoiceItem] = Field(default_factory=list)
     status: ExtractionStatus
     issues: list[ExtractionIssue] = Field(default_factory=list)
     candidates: list[ExtractionCandidate] = Field(default_factory=list)
