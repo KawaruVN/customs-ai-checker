@@ -13,21 +13,29 @@ from customs_ai.extraction.headers import (
     extract_invoice_headers,
 )
 from customs_ai.extraction.mapper import parse_date, parse_decimal
+from customs_ai.extraction.items import (
+    DeterministicInvoiceItemExtractor,
+    extract_invoice_items,
+)
 from customs_ai.extraction.models import (
     ExtractionCandidate,
     ExtractionIssue,
     InvoiceHeaderExtractionResult,
+    InvoiceItemExtractionResult,
 )
 
 __all__ = [
     "APPROVED_HEADER_PATHS",
     "APPROVED_ITEM_PATHS",
     "DeterministicInvoiceHeaderExtractor",
+    "DeterministicInvoiceItemExtractor",
     "ExtractionCandidate",
     "ExtractionIssue",
     "ExtractionStatus",
     "InvoiceExtractionConfig",
     "InvoiceHeaderExtractionResult",
+    "InvoiceItemExtractionResult",
+    "extract_invoice_items",
     "extract_invoice_headers",
     "load_invoice_extraction_config",
     "normalize_alias",
