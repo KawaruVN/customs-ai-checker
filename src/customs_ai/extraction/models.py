@@ -1,4 +1,13 @@
+from datetime import date, datetime, time
+from decimal import Decimal
+from typing import Union
+
 from pydantic import BaseModel, ConfigDict, Field
+
+from customs_ai.domain.schema import Invoice
+from customs_ai.extraction.enums import ExtractionStatus
+
+CandidateTypedValue = Union[bool, date, datetime, time, Decimal, int, float, str, None]
 
 
 class ExtractionIssue(BaseModel):
@@ -29,3 +38,15 @@ class ExtractionCandidate(BaseModel):
     bounding_box: tuple[float, float, float, float] | None = None
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     extraction_method: str | None = None
+    typed_value: CandidateTypedValue = None
+
+
+class InvoiceHeaderExtractionResult(BaseModel):
+    """Result of deterministic invoice header extraction."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    invoice: Invoice
+    status: ExtractionStatus
+    issues: list[ExtractionIssue] = Field(default_factory=list)
+    candidates: list[ExtractionCandidate] = Field(default_factory=list)

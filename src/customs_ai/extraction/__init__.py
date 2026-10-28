@@ -1,4 +1,4 @@
-"""Extraction foundation package."""
+"""Extraction foundation and deterministic extraction package."""
 
 from customs_ai.extraction.config import (
     APPROVED_HEADER_PATHS,
@@ -8,16 +8,27 @@ from customs_ai.extraction.config import (
     normalize_alias,
 )
 from customs_ai.extraction.enums import ExtractionStatus
+from customs_ai.extraction.headers import (
+    DeterministicInvoiceHeaderExtractor,
+    extract_invoice_headers,
+)
 from customs_ai.extraction.mapper import parse_date, parse_decimal
-from customs_ai.extraction.models import ExtractionCandidate, ExtractionIssue
+from customs_ai.extraction.models import (
+    ExtractionCandidate,
+    ExtractionIssue,
+    InvoiceHeaderExtractionResult,
+)
 
 __all__ = [
     "APPROVED_HEADER_PATHS",
     "APPROVED_ITEM_PATHS",
+    "DeterministicInvoiceHeaderExtractor",
     "ExtractionCandidate",
     "ExtractionIssue",
     "ExtractionStatus",
     "InvoiceExtractionConfig",
+    "InvoiceHeaderExtractionResult",
+    "extract_invoice_headers",
     "load_invoice_extraction_config",
     "normalize_alias",
     "parse_date",

@@ -182,7 +182,7 @@ Current:
 
 ```text
 TASK-006A — DONE (Merged via PR #1, commit 02a748e)
-TASK-006B — TODO (Next active subtask)
+TASK-006B — IN_PROGRESS
 TASK-006C — TODO
 TASK-006D — TODO
 TASK-006E — TODO
