@@ -1,0 +1,291 @@
+# Invoice Extraction Alias Configuration
+# Maps canonical domain field paths to candidate label aliases in documents.
+# Aliases are customer-neutral and support English (EN), Vietnamese (VI), and Chinese (ZH).
+#
+# Contexts:
+# - headers: Invoice header-level fields
+# - items: Invoice line-item table fields
+#
+# Party Role Separation (MASTER_SPEC.md Section 20):
+# Seller, Buyer, Shipper, Consignee, Exporter, and Importer are distinct roles.
+# Aliases for seller.name MUST NOT conflate with Shipper/Exporter.
+# Aliases for buyer.name MUST NOT conflate with Consignee/Importer.
+#
+# Note: Prefix overlaps (e.g. SELLER vs SELLER ADDRESS) are allowed at this config
+# layer and are resolved by downstream extraction logic (TASK-006B).
+
+headers:
+  invoice_number:
+    - "INVOICE NO"
+    - "INVOICE NUMBER"
+    - "INVOICE #"
+    - "INV NO"
+    - "SỐ HÓA ĐƠN"
+    - "发票号码"
+    - "发票号"
+
+  invoice_date:
+    - "INVOICE DATE"
+    - "DATE OF INVOICE"
+    - "DATE"
+    - "NGÀY HÓA ĐƠN"
+    - "NGÀY"
+    - "发票日期"
+    - "日期"
+
+  seller.name:
+    - "SELLER"
+    - "VENDOR"
+    - "SUPPLIER"
+    - "NGƯỜI BÁN"
+    - "ĐƠN VỊ BÁN"
+    - "BÊN BÁN"
+    - "NHÀ CUNG CẤP"
+    - "卖方"
+    - "销售方"
+    - "供应商"
+
+  seller.tax_id:
+    - "SELLER TAX ID"
+    - "SELLER VAT NO"
+    - "SELLER TAX CODE"
+    - "MÃ SỐ THUẾ NGƯỜI BÁN"
+    - "MST NGƯỜI BÁN"
+    - "卖方税号"
+
+  seller.address:
+    - "SELLER ADDRESS"
+    - "ADDRESS OF SELLER"
+    - "ĐỊA CHỈ NGƯỜI BÁN"
+    - "卖方地址"
+
+  buyer.name:
+    - "BUYER"
+    - "PURCHASER"
+    - "CUSTOMER"
+    - "NGƯỜI MUA"
+    - "ĐƠN VỊ MUA"
+    - "BÊN MUA"
+    - "KHÁCH HÀNG"
+    - "买方"
+    - "购买方"
+    - "客户"
+
+  buyer.tax_id:
+    - "BUYER TAX ID"
+    - "BUYER VAT NO"
+    - "BUYER TAX CODE"
+    - "MÃ SỐ THUẾ NGƯỜI MUA"
+    - "MST NGƯỜI MUA"
+    - "买方税号"
+
+  buyer.address:
+    - "BUYER ADDRESS"
+    - "ADDRESS OF BUYER"
+    - "ĐỊA CHỈ NGƯỜI MUA"
+    - "买方地址"
+
+  ship_to.name:
+    - "SHIP TO"
+    - "DELIVER TO"
+    - "DELIVERY TO"
+    - "SHIP TO NAME"
+    - "DELIVERY NAME"
+    - "NGƯỜI NHẬN HÀNG"
+    - "ĐƠN VỊ NHẬN HÀNG"
+    - "送货至"
+    - "交付至"
+    - "收货方"
+
+  ship_to.address:
+    - "SHIP TO ADDRESS"
+    - "DELIVERY ADDRESS"
+    - "ĐỊA CHỈ GIAO HÀNG"
+    - "ĐỊA CHỈ NHẬN HÀNG"
+    - "送货地址"
+
+  currency:
+    - "CURRENCY"
+    - "CURRENCY CODE"
+    - "TIỀN TỆ"
+    - "LOẠI TIỀN"
+    - "币种"
+
+  incoterm:
+    - "INCOTERM"
+    - "INCOTERMS"
+    - "DELIVERY TERM"
+    - "TERMS OF DELIVERY"
+    - "ĐIỀU KIỆN GIAO HÀNG"
+    - "贸易术语"
+    - "价格条款"
+
+  payment_term:
+    - "PAYMENT TERM"
+    - "PAYMENT TERMS"
+    - "TERMS OF PAYMENT"
+    - "ĐIỀU KHOẢN THANH TOÁN"
+    - "PHƯƠNG THỨC THANH TOÁN"
+    - "付款条件"
+    - "付款方式"
+
+  total_amount:
+    - "TOTAL AMOUNT"
+    - "TOTAL"
+    - "GRAND TOTAL"
+    - "TOTAL INVOICE VALUE"
+    - "TỔNG TIỀN"
+    - "TỔNG CỘNG"
+    - "总金额"
+    - "合计"
+
+  freight:
+    - "FREIGHT"
+    - "FREIGHT CHARGE"
+    - "OCEAN FREIGHT"
+    - "AIR FREIGHT"
+    - "CƯỚC VẬN CHUYỂN"
+    - "CƯỚC PHÍ"
+    - "运费"
+
+  insurance:
+    - "INSURANCE"
+    - "INSURANCE CHARGE"
+    - "INSURANCE PREMIUM"
+    - "BẢO HIỂM"
+    - "PHÍ BẢO HIỂM"
+    - "保费"
+    - "保险费"
+
+  discount:
+    - "DISCOUNT"
+    - "DISCOUNT AMOUNT"
+    - "CHIẾT KHẤU"
+    - "GIẢM GIÁ"
+    - "折扣"
+
+items:
+  item_number:
+    - "NO"
+    - "NO."
+    - "ITEM NO"
+    - "ITEM"
+    - "STT"
+    - "SỐ TT"
+    - "序号"
+    - "项号"
+
+  item_code:
+    - "ITEM CODE"
+    - "CODE"
+    - "PRODUCT CODE"
+    - "COMMODITY CODE"
+    - "MÃ HÀNG"
+    - "MÃ SẢN PHẨM"
+    - "商品编码"
+    - "品号"
+
+  part_number:
+    - "PART NO"
+    - "PART NUMBER"
+    - "P/N"
+    - "PN"
+    - "MÃ PHỤ TÙNG"
+    - "零件号"
+
+  model:
+    - "MODEL"
+    - "MODEL NO"
+    - "TYPE"
+    - "QUY CÁCH"
+    - "KIỂU DÁNG"
+    - "型号"
+
+  description:
+    - "DESCRIPTION"
+    - "DESCRIPTION OF GOODS"
+    - "ITEM DESCRIPTION"
+    - "GOODS DESCRIPTION"
+    - "COMMODITY"
+    - "TÊN HÀNG"
+    - "MÔ TẢ HÀNG HÓA"
+    - "TÊN HÀNG HÓA"
+    - "品名"
+    - "货物名称"
+
+  brand:
+    - "BRAND"
+    - "BRAND NAME"
+    - "MAKE"
+    - "NHÃN HIỆU"
+    - "THƯƠNG HIỆU"
+    - "品牌"
+    - "商标"
+
+  manufacturer:
+    - "MANUFACTURER"
+    - "PRODUCER"
+    - "MAKER"
+    - "NHÀ SẢN XUẤT"
+    - "HÃNG SẢN XUẤT"
+    - "制造商"
+    - "生产商"
+
+  quantity:
+    - "QTY"
+    - "QUANTITY"
+    - "SỐ LƯỢNG"
+    - "SL"
+    - "数量"
+
+  unit:
+    - "UNIT"
+    - "UOM"
+    - "UNIT OF MEASURE"
+    - "ĐƠN VỊ TÍNH"
+    - "ĐVT"
+    - "单位"
+
+  unit_price:
+    - "UNIT PRICE"
+    - "PRICE"
+    - "U/PRICE"
+    - "ĐƠN GIÁ"
+    - "单价"
+
+  amount:
+    - "AMOUNT"
+    - "TOTAL PRICE"
+    - "EXTENDED PRICE"
+    - "LINE TOTAL"
+    - "THÀNH TIỀN"
+    - "金额"
+
+  origin:
+    - "ORIGIN"
+    - "COUNTRY OF ORIGIN"
+    - "COO"
+    - "XUẤT XỨ"
+    - "NƯỚC XUẤT XỨ"
+    - "原产国"
+    - "产地"
+
+  weight:
+    - "WEIGHT"
+    - "NET WEIGHT"
+    - "GROSS WEIGHT"
+    - "TRỌNG LƯỢNG"
+    - "KHỐI LƯỢNG"
+    - "重量"
+    - "净重"
+
+  package_information:
+    - "PACKING"
+    - "PACKAGE"
+    - "PACKAGE INFO"
+    - "PACKAGE INFORMATION"
+    - "PACKAGING"
+    - "QUY CÁCH ĐÓNG GÓI"
+    - "ĐÓNG GÓI"
+    - "包装"
+    - "件数"
