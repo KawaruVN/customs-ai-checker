@@ -1,13 +1,16 @@
 # TASK-006A — Extraction Foundation
 
-Status: IN_PROGRESS  
+Status: DONE  
 Priority: P1  
 Parent: TASK-006  
-Owner: Gemini #1 — Main Developer  
-Reviewer: Gemini #2 — Reviewer / QA  
+Owner: Antigravity — Main Developer  
+Reviewer: Codex — Technical Reviewer / QA  
 Created: 2026-09-11  
+Completed: 2026-10-28  
+Merged PR: #1 (commit `02a748e`)  
 Dependencies: TASK-001..TASK-005A DONE  
-Authoritative pre-task baseline: 178 passed / 0 failed / 0 skipped / 2 warnings
+Authoritative pre-task baseline: 178 passed / 0 failed / 0 skipped / 2 warnings  
+Post-task baseline: 207 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1)
 
 ---
 
@@ -222,23 +225,25 @@ Do not create empty future modules just to reserve names.
 
 ## 5. ACCEPTANCE CRITERIA
 
-- AC-01: extraction package imports successfully on Python 3.13.14.
-- AC-02: strict issue/status models reject undeclared fields where appropriate.
-- AC-03: config loads independent of current working directory.
-- AC-04: all approved header paths are accepted.
-- AC-05: all approved item paths are accepted.
-- AC-06: unknown paths are rejected.
-- AC-07: blank aliases are rejected.
-- AC-08: conflicting exact duplicate aliases inside the same context are rejected.
-- AC-09: header and item alias namespaces are validated intentionally, not accidentally coupled.
-- AC-10: numeric safe cases parse exactly to Decimal.
-- AC-11: `1,200`, `1.200`, and grouping-only ambiguous forms return None.
-- AC-12: formulas/arbitrary text do not become numbers.
-- AC-13: safe ISO-like dates parse.
-- AC-14: ambiguous day/month dates return None.
-- AC-15: no parser/repository/network dependency is introduced by TASK-006A.
-- AC-16: all pre-existing 178 tests remain green.
-- AC-17: final full suite result is exact, not estimated.
+- AC-01: [PASS] extraction package imports successfully on Python 3.13.14.
+- AC-02: [PASS] strict issue/status models reject undeclared fields where appropriate.
+- AC-03: [PASS] config loads independent of current working directory.
+- AC-04: [PASS] all approved header paths are accepted; party role boundaries strictly maintained.
+- AC-05: [PASS] all approved item paths are accepted.
+- AC-06: [PASS] unknown paths are rejected.
+- AC-07: [PASS] blank aliases are rejected.
+- AC-08: [PASS] conflicting exact duplicate aliases inside the same context are rejected.
+- AC-09: [PASS] header and item alias namespaces are validated intentionally, not accidentally coupled.
+- AC-10: [PASS] numeric safe cases parse exactly to Decimal; non-finite Decimals rejected.
+- AC-11: [PASS] `1,200`, `1.200`, and grouping-only ambiguous forms return None.
+- AC-12: [PASS] formulas/arbitrary text do not become numbers.
+- AC-13: [PASS] safe ISO-like dates parse; datetime safely converted to pure date.
+- AC-14: [PASS] ambiguous day/month dates return None.
+- AC-15: [PASS] no parser/repository/network dependency is introduced by TASK-006A.
+- AC-16: [PASS] all pre-existing 178 tests remain green.
+- AC-17: [PASS] final full suite result is exact: 207 passed, 2 warnings (178 baseline + 29 TASK-006A tests).
+
+All 17/17 Acceptance Criteria verified PASS.
 
 ---
 
@@ -266,7 +271,8 @@ Required groups:
 - empty alias rejection;
 - blank alias rejection;
 - duplicate conflict rejection;
-- harmless reuse across separate header/item contexts behaves according to documented policy.
+- harmless reuse across separate header/item contexts behaves according to documented policy;
+- party role separation guarantee (regression test).
 
 ### Decimal
 
@@ -280,6 +286,7 @@ Required groups:
 - repeated grouping only;
 - formula;
 - arbitrary alphabetic text;
+- non-finite Decimals (NaN, sNaN, Infinity);
 - None / blank.
 
 ### Date
@@ -287,6 +294,7 @@ Required groups:
 - YYYY-MM-DD;
 - YYYY/MM/DD;
 - YYYY.MM.DD;
+- typed datetime (naive and timezone-aware) converted to pure date;
 - invalid calendar date;
 - ambiguous day/month;
 - arbitrary text.
@@ -295,50 +303,59 @@ No document fixtures are needed.
 
 ---
 
-## 7. VALIDATION
+## 7. VALIDATION EVIDENCE
 
-Developer must run:
-
-```text
-python -m pytest tests/unit/extraction --collect-only -q
-python -m pytest --collect-only -q
-python -m pytest -v
-```
-
-Report exact:
+Authoritative pytest commands and counts:
 
 ```text
-TASK-006A collected items
-global collected items
-passed
-failed
-skipped
-warnings
-runtime
+python -m pytest tests/unit/extraction --collect-only -q  # 29 tests collected
+python -m pytest --collect-only -q                       # 207 tests collected
+python -m pytest -v                                      # 207 passed, 2 warnings in 3.54s
 ```
 
-No approximation and no manual `178 + N` substitution for actual pytest evidence.
+Detailed test metrics:
+- Focused extraction tests: 29 passed, 0 failed, 0 skipped
+- Pre-existing regression suite: 178 passed (100% green)
+- Total suite: 207 passed, 0 failed, 0 skipped, 2 warnings (Starlette/httpx testclient deprecations)
+- Environment: Windows, Python 3.13.14, pytest 9.1.1
 
 ---
 
 ## 8. DELIVERABLE
 
-Return complete repo-relative replacement/new files for TASK-006A only.
-
-Do not include future TASK-006B..F implementation stubs.
-
-Do not move TASK-006A to done.
+- `config/invoice_extraction.yaml`
+- `src/customs_ai/extraction/__init__.py`
+- `src/customs_ai/extraction/enums.py`
+- `src/customs_ai/extraction/models.py`
+- `src/customs_ai/extraction/config.py`
+- `src/customs_ai/extraction/mapper.py`
+- `tests/unit/extraction/__init__.py`
+- `tests/unit/extraction/test_config.py`
+- `tests/unit/extraction/test_mapper.py`
+- `tests/unit/extraction/test_models.py`
 
 ---
 
 ## 9. DEFINITION OF DONE
 
-- [ ] scope stayed within foundation only
-- [ ] extraction package primitives implemented
-- [ ] config implemented and validated
-- [ ] strict Decimal parser implemented
-- [ ] strict date parser implemented
-- [ ] focused tests added
-- [ ] pre-existing regression green
-- [ ] Gemini #2 APPROVE
-- [ ] Project Leader APPROVE
+- [x] scope stayed within foundation only
+- [x] extraction package primitives implemented
+- [x] config implemented and validated
+- [x] strict Decimal parser implemented
+- [x] strict date parser implemented
+- [x] focused tests added (29 tests)
+- [x] pre-existing regression green (178/178 tests)
+- [x] Codex APPROVE
+- [x] Project Leader APPROVE
+
+---
+
+## 10. CLOSURE SUMMARY
+
+- **Status**: CLOSED / DONE
+- **Date**: 2026-10-28
+- **Merged PR**: Pull Request #1 (`02a748e`)
+- **Acceptance Criteria**: 17/17 PASS
+- **Review Decision**: Codex — Technical Reviewer / QA — APPROVE
+- **Architectural Approval**: ChatGPT — Project Leader / Architect — APPROVE
+- **Baseline for TASK-006B**: 207 passed, 0 failed, 0 skipped, 2 warnings

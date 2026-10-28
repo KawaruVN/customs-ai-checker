@@ -141,11 +141,11 @@ Quyết định nghiệp vụ, scope và release cuối cùng.
 
 Phụ trách kiến trúc, spec và duyệt kỹ thuật.
 
-### Gemini #1 — Main Developer
+### Antigravity — Main Developer
 
 Phụ trách implementation, tests, documentation.
 
-### Gemini #2 — Reviewer / QA
+### Codex — Technical Reviewer / QA
 
 Phụ trách review edge cases, security, cost.
 
@@ -158,11 +158,11 @@ Project Leader writes Task
         ↓
 tasks/todo/
         ↓
-Gemini #1 implements
+Antigravity implements
         ↓
 tasks/in_progress/
         ↓
-Gemini #2 reviews
+Codex reviews
         ↓
 APPROVE or REQUEST CHANGES
         ↓
@@ -191,7 +191,14 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006A — Extraction Foundation` (IN_PROGRESS; parent epic: TASK-006)
+Current task: `TASK-006B — Deterministic Invoice Headers` (TODO; parent epic: TASK-006)
+
+Recently completed:
+- `TASK-006A — Extraction Foundation` (DONE — Merged via PR #1)
+  - Primitives: `ExtractionStatus`, typed `ExtractionIssue`, provider-neutral `ExtractionCandidate`.
+  - Configuration: `config/invoice_extraction.yaml` covering 17 approved header paths and 14 item paths with strict EN/VI/ZH aliases and party role separation (MASTER_SPEC.md:499).
+  - Lexical parsing: strict `parse_decimal` (safe integers, decimals, grouped formats; rejection of ambiguous single separators and non-finite numbers) and `parse_date` (explicit ISO-like formats; datetime truncation to pure date).
+  - Test suite: 207 passed, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 ## Local parser layer
 
