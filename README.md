@@ -194,11 +194,19 @@ Không commit:
 
 Current phase: `TASK-007 — Packing List Extraction` (Phase: `V1 — Document Understanding`)
 
-Current task: `TASK-007C — Deterministic Packing Item Tables` (TODO — Công việc tiếp theo; Parent Epic: TASK-007)
+Current task: `TASK-007D — Packing Service & Reviewed Persistence` (TODO — Công việc tiếp theo; Parent Epic: TASK-007)
 
-Authoritative baseline: 962 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+Authoritative baseline: 1178 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 Recently completed:
+- `TASK-007C — Deterministic Packing Item Tables` (DONE — Merged via PR #9, commit `bde5e61`)
+  - Trích xuất bảng hàng hóa (item tables) của Packing List từ file Excel (XLSX, XLS) dựa trên canonical `PackingItem` và 7 trường canonical đã phê duyệt trong `config/packing_extraction.yaml`.
+  - Cơ chế nhận diện bảng 2 tầng chặt chẽ: yêu cầu đồng thời cột định danh (item_code/description) và cột số lượng/trọng lượng; chỉ công nhận bảng hợp lệ khi có ít nhất một dòng dữ liệu thực tế chứa cả định danh và số liệu an toàn trên cùng một hàng.
+  - Phân định rõ ràng giữa tổng chứng từ (document totals) và số liệu từng dòng hàng; bảo toàn nguyên vẹn mã kiện (package_number), số lượng (quantity), trọng lượng cả bì/tịnh (gross/net weight).
+  - Tự động dừng tại các biên phân cách (TOTAL, GRAND TOTAL, SUBTOTAL, NOTES, REMARKS, GHI CHÚ, 备注) mà không loại bỏ các mô tả hàng hóa hợp lệ chứa từ khóa tổng (TOTALIZER FLOW SENSOR).
+  - Phòng thủ toàn diện trước ô ẩn, ô công thức, và ô gộp (merged cells); bảo vệ nguyên vẹn tính chính xác của Decimal và chuỗi ký tự có số 0 ở đầu.
+  - Xử lý xung đột đa bảng bảo thủ: tự động từ chối và yêu cầu review (`MULTIPLE_PACKING_TABLES`, `items=[]`) khi xuất hiện nhiều bảng khả tín cạnh tranh, tuyệt đối không dùng đa số phiếu hay gộp ngầm.
+  - Bộ kiểm thử: 216 test cases mới (69 tables, 109 safety, 25 adversarial, 13 integration), 1178 tests full-suite passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 40/40 independent adversarial probes passed.
 - `TASK-007B — Deterministic Packing List Headers` (DONE — Merged via PR #8, commit `3e7e1d8`)
   - Trích xuất deterministic header của Packing List từ PDF và Excel dựa trên canonical `PackingList` và 16 canonical paths đã phê duyệt trong `config/packing_extraction.yaml`.
   - Phân định vai trò nghiêm ngặt giữa commercial parties (`seller`, `buyer`) và logistics roles (`SHIPPER`, `CONSIGNEE`, `NOTIFY PARTY` được đưa vào `_NON_HEADER_LABELS` để làm biên chắn bảo vệ dỿ liệu).

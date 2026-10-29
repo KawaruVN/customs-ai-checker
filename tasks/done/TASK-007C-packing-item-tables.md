@@ -1,17 +1,18 @@
 # TASK-007C — Deterministic Packing Item Tables
 
-Status: IN_PROGRESS  
+Status: DONE  
 Priority: P1  
 Parent: TASK-007  
-Developer: Codex  
-Reviewer: Antigravity  
+Developer: Codex — Main Developer  
+Reviewer: Antigravity — Independent Technical Reviewer / QA (APPROVE)  
+Final Approver: ChatGPT — Project Leader / Architect (APPROVE)  
+Completed date: 2026-10-29  
+Pull Request: PR #9 (Merged into main)  
+Implementation Commit: `c9ab20b4612c9381b7e12054b8021c37db033b3f`  
+Merge Commit: `bde5e619da08ca16a6bd1d63b460d5f31dd459e0`  
+Pre-task baseline: 962 passed / 0 failed / 0 skipped / 2 warnings  
+Post-task baseline: 1178 passed / 0 failed / 0 skipped / 2 warnings  
 Dependencies: TASK-007A and TASK-007B approved and merged
-
-Developer role: Codex — Main Developer  
-Reviewer role: Antigravity — Independent Technical Reviewer / QA  
-Final Approver: ChatGPT — Project Leader / Architect  
-Development date: 2026-10-29  
-Pre-task baseline: 962 passed / 0 failed / 0 skipped / 2 warnings
 
 ## Objective and inputs
 
@@ -336,9 +337,22 @@ publication action was performed.
   competing regions with identical versus conflicting data. Recheck source bytes
   and privacy-safe issues, then all Invoice/Packing header regressions.
 
-## Review and Git handoff
+## Task closure and sign-off
 
-Status remains IN_PROGRESS. No commit, push, merge, PR or task closure is performed.
-Shared README, parent Epic and completed task documents are unchanged. Suggested
-owner commit summary: `TASK-007C: implement deterministic packing item tables`.
-Independent Antigravity approval and Project Leader review are still required.
+- Status: DONE
+- Completed: 2026-10-29
+- Developer: Codex — Main Developer (APPROVE)
+- Independent Technical Reviewer: Antigravity — QA & Reviewer (APPROVE)
+- Final Approval Authority: ChatGPT — Project Leader / Architect (APPROVE)
+- Pull Request: #9 merged into main
+- Implementation commit: `c9ab20b4612c9381b7e12054b8021c37db033b3f`
+- Merge commit: `bde5e619da08ca16a6bd1d63b460d5f31dd459e0`
+- Full test evidence: 1178 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+- 216 new tests added:
+  - `tests/unit/extraction/test_packing_items_tables.py`: 69 passed
+  - `tests/unit/extraction/test_packing_items_safety.py`: 109 passed
+  - `tests/unit/extraction/test_packing_items_adversarial.py`: 25 passed
+  - `tests/unit/extraction/test_packing_items_integration.py`: 13 passed
+- Independent adversarial probes: 40/40 passed (A01–A40).
+- Production artifacts:
+  - `src/customs_ai/extraction/packing_items.py`: DeterministicPackingItemExtractor implementing table discovery, 7 canonical item fields, EN/VI/ZH labels, row association, summary boundaries, hidden/formula safeguards, and competing table abstention.
