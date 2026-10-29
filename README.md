@@ -194,7 +194,9 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006D — Extraction Persistence & State` (TODO; parent epic: TASK-006)
+Current task: `TASK-006D — Extraction Persistence & State (IN_PROGRESS; Codex Main Developer; Antigravity Independent Reviewer)`
+
+Authoritative baseline for TASK-006D: 291 passed, 0 failed, 0 skipped, 2 warnings.
 
 Recently completed:
 - `TASK-006C — Invoice Item Tables` (DONE — Merged via PR #3, commit `8bbb7f8`)
