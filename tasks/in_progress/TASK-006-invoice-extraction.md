@@ -184,12 +184,12 @@ Current:
 TASK-006A — DONE (Merged via PR #1, commit 02a748e)
 TASK-006B — DONE (Merged via PR #2, commit 29c4da2)
 TASK-006C — DONE (Merged via PR #3, commit 8bbb7f8)
-TASK-006D — IN_PROGRESS (Codex developer; Antigravity independent reviewer)
-TASK-006E — TODO
+TASK-006D — DONE (Merged via PR #4, commit cd875b9)
+TASK-006E — IN_PROGRESS (Codex developer; Antigravity independent reviewer)
 TASK-006F — TODO
 ```
 
-Current authoritative baseline for TASK-006D: 291 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1).
+Current authoritative baseline for TASK-006E: 435 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 After each child is approved:
 
@@ -210,7 +210,7 @@ TASK-006 is DONE only when:
 - [x] TASK-006A DONE
 - [x] TASK-006B DONE
 - [x] TASK-006C DONE
-- [ ] TASK-006D DONE
+- [x] TASK-006D DONE
 - [ ] TASK-006E DONE
 - [ ] TASK-006F DONE
 - [ ] final Invoice extraction flow passes full regression

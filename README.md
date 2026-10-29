@@ -194,9 +194,9 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006D — Extraction Persistence & State (IN_PROGRESS; Codex Main Developer; Antigravity Independent Reviewer)`
+Current task: `TASK-006E — Invoice Extraction Service (IN_PROGRESS; Codex Main Developer; Antigravity Independent Reviewer)`
 
-Authoritative baseline for TASK-006D: 291 passed, 0 failed, 0 skipped, 2 warnings.
+Authoritative baseline for TASK-006E: 435 passed, 0 failed, 0 skipped, 2 warnings.
 
 Recently completed:
 - `TASK-006C — Invoice Item Tables` (DONE — Merged via PR #3, commit `8bbb7f8`)
