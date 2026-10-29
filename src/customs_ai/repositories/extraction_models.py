@@ -32,6 +32,7 @@ from customs_ai.extraction.models import (
     InvoiceItemExtractionResult,
 )
 from customs_ai.ingestion.enums import ProcessingStatus
+from customs_ai.ingestion.models import SourceDocument
 
 ExtractionResult = InvoiceHeaderExtractionResult | InvoiceItemExtractionResult
 _RESULT_ADAPTER = TypeAdapter(ExtractionResult)
@@ -112,6 +113,8 @@ class ExtractionAttempt(BaseModel):
     document_id: StrictStr
     source_file_hash: StrictStr
     expected_processing_status: ProcessingStatus
+    # Optional stronger CAS for application callers. Not stored in the payload.
+    expected_source_document: SourceDocument | None = None
     result: ExtractionResult
     schema_version: Literal["0.1"] = "0.1"
     extraction_method: StrictStr | None = None
@@ -131,6 +134,12 @@ class ExtractionAttempt(BaseModel):
 
     @model_validator(mode="after")
     def check_source_provenance(self) -> "ExtractionAttempt":
+        if self.expected_source_document is not None and (
+            self.expected_source_document.document_id != self.document_id
+            or self.expected_source_document.file_hash != self.source_file_hash
+            or self.expected_source_document.processing_status != self.expected_processing_status
+        ):
+            raise ValueError("Source snapshot preconditions are inconsistent.")
         _check_provenance(self.result.model_dump(mode="python"), self.document_id)
         return self
 

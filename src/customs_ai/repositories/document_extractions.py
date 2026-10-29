@@ -112,6 +112,8 @@ class DocumentExtractionRepository:
                     if (
                         source.file_hash != attempt.source_file_hash
                         or source.processing_status != attempt.expected_processing_status
+                        or attempt.expected_source_document is not None
+                        and source != attempt.expected_source_document
                     ):
                         raise ExtractionConflictError("SourceDocument changed before extraction save.")
 

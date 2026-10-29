@@ -194,7 +194,7 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006E — Invoice Extraction Application Service` (TODO; parent epic: TASK-006)
+Current task: `TASK-006E — Invoice Extraction Service` (IN_PROGRESS; Codex Developer, Antigravity Reviewer; parent epic: TASK-006)
 
 Authoritative baseline for TASK-006E: 435 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
