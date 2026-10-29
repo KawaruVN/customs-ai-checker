@@ -150,12 +150,17 @@ class InvoiceExtractionService:
             if not isinstance(output, ResolvedPdfDocument):
                 return None
             resolved = ResolvedPdfDocument.model_validate(output.model_dump(mode="python", warnings="error"))
+            visual_pages = {page.page for page in resolved.pages if page.source != TextResolutionSource.TEXT_LAYER}
             if (
                 resolved.document_id != document.document_id
+                or resolved.file_type != document.file_type
                 or resolved.page_count != document.page_count
                 or resolved.requires_review or resolved.unresolved_pages
+                or resolved.vision_fallback_recommended
                 or len(resolved.pages) != document.page_count
                 or {p.page for p in resolved.pages} != expected
+                or len(resolved.visual_pages) != len(set(resolved.visual_pages))
+                or set(resolved.visual_pages) != visual_pages
             ):
                 return None
             originals = {p.page: p.text for p in document.pages}
