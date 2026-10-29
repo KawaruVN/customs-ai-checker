@@ -138,3 +138,144 @@ def invoice_pipeline(tmp_path, monkeypatch):
     # local doubles; other tests must never initialize optional OCR engines.
     monkeypatch.setattr(settings.vision, "enabled", False)
     return InvoicePipeline(tmp_path)
+
+
+class PackingPipeline(InvoicePipeline):
+    """Synthetic bytes plus the actual Packing production factories; no extract logic."""
+
+    def __init__(self, tmp_path):
+        packing_root = tmp_path / "packing-fixture-root"
+        packing_root.mkdir()
+        super().__init__(packing_root)
+        self.original_hashes = {}
+
+    @staticmethod
+    def rows():
+        return [
+            ["PACKING LIST"],
+            ["PACKING LIST NO", "0000456"],
+            ["PACKING LIST DATE", "2026-10-29"],
+            ["SELLER", "Synthetic Exporter"],
+            ["SELLER TAX ID", "00000123"],
+            ["SELLER ADDRESS", "Seller Road 1"],
+            ["BUYER", "Synthetic Importer"],
+            ["BUYER TAX ID", "00000456"],
+            ["BUYER ADDRESS", "Buyer Road 2"],
+            ["SHIPMENT REFERENCE", "SHIP/2026/0001"],
+            ["INVOICE NO", "00000789"],
+            ["INVOICE NO", "00000790"],
+            ["TOTAL PACKAGES", "0.00"],
+            ["PACKAGE TYPE", "Carton"],
+            ["TOTAL GROSS WEIGHT", "123456789012345.1200"],
+            ["TOTAL NET WEIGHT", "120000000000000.2500"],
+            ["DIMENSIONS", "10 x 20 x 30 CM"],
+            ["TOTAL VOLUME", "0.20"],
+            [],
+            [None, None, "ITEM CODE", "DESCRIPTION", "QTY", "UNIT", "PACKAGE NO.", "GROSS WEIGHT", "NET WEIGHT"],
+            [None, None, "000009", "Synthetic control motor", "0.00", "PCS", "000001", "3.50", "3.00"],
+            [None, None, "000010", "TOTAL CONTROL", "2.50", "PCS", "000002", "12.50", "11.50"],
+        ]
+
+    def xlsx(self, rows=None, *, filename="synthetic-packing.xlsx", mutate=None):
+        def prepare(book):
+            book.active.title = "Packing Data"
+            if mutate is not None:
+                mutate(book)
+        return super().xlsx(self.rows() if rows is None else rows, filename=filename, mutate=prepare)
+
+    def xls(self, rows=None, *, filename="synthetic-packing.xls"):
+        import xlwt
+        path = self.directory / filename
+        book = xlwt.Workbook()
+        sheet = book.add_sheet("Packing Data")
+        for r, values in enumerate(self.rows() if rows is None else rows):
+            for c, value in enumerate(values):
+                if value is not None:
+                    if isinstance(value, date):
+                        sheet.write(r, c, value, xlwt.easyxf(num_format_str="YYYY-MM-DD"))
+                    else:
+                        sheet.write(r, c, value)
+        book.save(str(path))
+        return path
+
+    def pdf(self, pages=None, *, filename="synthetic-packing.pdf"):
+        if pages is None:
+            pages = [
+                "PACKING LIST\nPACKING LIST NO: 0000456\nPACKING LIST DATE: 2026-10-29\n"
+                "SELLER: Synthetic Exporter\nSELLER TAX ID: 00000123\nSELLER ADDRESS: Seller Road 1\n"
+                "BUYER: Synthetic Importer\nBUYER TAX ID: 00000456\nBUYER ADDRESS: Buyer Road 2\n"
+                "SHIPMENT REFERENCE: SHIP/2026/0001\nINVOICE NO: 00000789",
+                "PACKING LIST\nINVOICE NO: 00000790\nTOTAL PACKAGES: 0.00\nPACKAGE TYPE: Carton\n"
+                "TOTAL GROSS WEIGHT: 123456789012345.1200\nTOTAL NET WEIGHT: 120000000000000.2500\n"
+                "DIMENSIONS: 10 x 20 x 30 CM\nTOTAL VOLUME: 0.20",
+            ]
+        return super().pdf(pages, filename=filename)
+
+    def register(self, path, **kwargs):
+        original = sha256(path.read_bytes()).hexdigest()
+        source = super().register(path, **kwargs)
+        assert sha256(path.read_bytes()).hexdigest() == original
+        self.original_hashes[source.document_id] = original
+        return source
+
+    def extract(self, document_id, **preconditions):
+        from customs_ai.application.composition import build_packing_extraction_service
+        return build_packing_extraction_service(self.repo).extract_document(document_id, **preconditions)
+
+    def assert_immutable(self, source):
+        assert sha256(self.source_bytes(source.document_id)).hexdigest() == self.original_hashes[source.document_id]
+
+    def assert_roundtrip(self, source, outcome):
+        from contextlib import closing
+        from decimal import Decimal
+        import json
+        from pydantic import BaseModel
+        from customs_ai.domain.schema import CanonicalField
+        from customs_ai.repositories.database import get_connection
+        from customs_ai.repositories.extraction_models import serialize_result, deserialize_result
+
+        assert outcome.persisted and outcome.record is not None
+        fresh = DocumentExtractionRepository()
+        by_id = fresh.get_by_extraction_id(outcome.record.extraction_id)
+        assert by_id == outcome.record and by_id.result == outcome.result
+        assert fresh.get_active(source.document_id) == outcome.active_record
+        history = fresh.list_history(source.document_id)
+        assert history[-1] == by_id
+        assert sum(record.is_active for record in history) <= 1
+        assert [record.attempt_number for record in history] == list(range(1, len(history) + 1))
+        assert by_id.schema_version == "0.1"
+        with closing(get_connection()) as connection:
+            payload = connection.execute("SELECT payload_json FROM document_extractions WHERE extraction_id=?",
+                                         (by_id.extraction_id,)).fetchone()[0]
+        envelope = json.loads(payload)
+        assert (envelope["format_version"], envelope["result_type"]) == (2, "packing_list")
+        assert deserialize_result(payload) == outcome.result
+        assert deserialize_result(serialize_result(by_id.result)) == outcome.result
+
+        def fields(value):
+            if isinstance(value, CanonicalField):
+                yield value
+            elif isinstance(value, BaseModel):
+                for _, child in value:
+                    yield from fields(child)
+            elif isinstance(value, list):
+                for child in value:
+                    yield from fields(child)
+        for original, restored in zip(fields(outcome.result.packing_list), fields(by_id.result.packing_list), strict=True):
+            assert original == restored
+            assert original.source_document_id == source.document_id
+            if isinstance(original.normalized_value, Decimal):
+                assert original.normalized_value.as_tuple() == restored.normalized_value.as_tuple()
+            assert type(original.normalized_value) is type(restored.normalized_value)
+        for original, restored in zip(outcome.result.candidates, by_id.result.candidates, strict=True):
+            assert original == restored and type(original.typed_value) is type(restored.typed_value)
+            if isinstance(original.typed_value, Decimal):
+                assert original.typed_value.as_tuple() == restored.typed_value.as_tuple()
+        self.assert_immutable(source)
+        return by_id
+
+
+@pytest.fixture
+def packing_pipeline(tmp_path, monkeypatch):
+    monkeypatch.setattr(settings.vision, "enabled", False)
+    return PackingPipeline(tmp_path)
