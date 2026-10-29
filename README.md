@@ -194,11 +194,19 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006F — Invoice Integration & Regression` (TODO; parent epic: TASK-006)
+Current task: `TASK-006 Epic Closure / Handover` (parent epic: TASK-006; next task: TASK-007 — Packing List Extraction)
 
-Authoritative baseline for TASK-006F: 566 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+Authoritative baseline: 616 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 Recently completed:
+- `TASK-006F — Invoice Integration & Regression` (DONE — Merged via PR #6, commit `be6c7d9`)
+  - End-to-end production pipeline integration connecting ingestion, classification, parsing, deterministic extraction, visual safety, semantic boundary, and persistence.
+  - Native 2-page PDF integration: verified zero visual/OCR provider calls, exact decimal/date provenance, empty items list, and explicit `PDF_ITEMS_UNSUPPORTED` review issue.
+  - Excel XLSX and XLS integration: exact decimal precision, zero/negative values, multi-sheet/shifted coordinates, formula opaqueness, and multi-table/hidden content abstention.
+  - Visual safety gates: whole-document review and zero semantic fallback calls on unresolved/conflicted pages; regression fix in `_resolve_pdf` enforcing strict metadata identity.
+  - Semantic boundary: verified fill-only policy, sticky deterministic conflicts, privacy sanitization, and grounded missing-header fill.
+  - SQLite persistence: verified 4-attempt lifecycle, single-active-record invariant, failed replacement deactivation safety, trigger rollback, and writer-lock CAS guards.
+  - Test suite: 50 new integration tests (21 True E2E, 29 Cross-Module), 616 full-suite tests passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 14 independent adversarial probes verified.
 - `TASK-006E — Invoice Extraction Service` (DONE — Merged via PR #5, commit `b6932c6`)
   - Application extraction service orchestration (`InvoiceExtractionService`, `build_invoice_extraction_service`).
   - Non-mutating downstream read/parse pipeline (`parse_document_readonly`), preventing status downgrade from `CLASSIFIED`/`NEEDS_REVIEW` to `PARSED`.

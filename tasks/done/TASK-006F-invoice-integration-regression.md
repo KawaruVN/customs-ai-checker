@@ -1,13 +1,16 @@
 # TASK-006F — Invoice Integration & Regression
 
-Status: IN_PROGRESS  
+Status: DONE  
 Priority: P1  
 Parent: TASK-006  
 Developer: Codex — Main Developer  
 Reviewer: Antigravity — Independent Technical Reviewer / QA  
-Baseline: 566 passed / 0 failed / 0 skipped / 2 warnings  
-Updated: 2026-10-29  
-Dependencies: TASK-006A..TASK-006E DONE
+Created: 2026-09-11  
+Completed: 2026-10-29  
+Merged PR: #6 (commit `be6c7d9`)  
+Dependencies: TASK-006A..TASK-006E DONE  
+Authoritative pre-task baseline: 566 passed / 0 failed / 0 skipped / 2 warnings  
+Post-task baseline: 616 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1)
 
 ## Objective
 
@@ -165,8 +168,69 @@ deprecation warnings. No pre-existing test assertions were weakened or removed.
   inject writer-lock metadata races and transaction failures, and independently
   confirm source hashes and log privacy.
 
-## Review state
+## Independent QA verification — 2026-10-29
 
-TASK-006F and parent TASK-006 remain unapproved and not DONE. Test evidence is a
-developer result awaiting independent Antigravity review and Project Leader's
-final decision. README and parent epic are intentionally unchanged.
+Antigravity independent technical review: **APPROVE**.
+
+### 1. Test Inventory Classification (50 New Tests)
+- **Category A (True End-to-End Application Integration):** 21 tests (42%)
+- **Category B (Cross-Module Integration):** 29 tests (58%)
+- **Category C (Unit / Mock-based):** 0 tests (0%)
+- **Category D (Duplicated / Low-value):** 0 tests (0%)
+
+All tests exercise the real `IngestionService`, real `SourceDocumentRepository`, real technical parsers (`pypdf`, `openpyxl`, `xlrd`), real deterministic extractors, and real `DocumentExtractionRepository` SQLite transactions under `BEGIN IMMEDIATE`.
+
+### 2. Independent Adversarial Probes
+14/14 independent probes PASSED across 14 failure modes:
+- Probe 1: Production factory wiring & complete isolated flow — PASS
+- Probe 2: Native PDF completeness invariant & PDF_ITEMS_UNSUPPORTED review flag — PASS
+- Probe 3: Excel Decimal precision, zero, negative & DB roundtrip preservation — PASS
+- Probe 4: Excel competing item-table ambiguity abstention — PASS
+- Probe 5: Visual safety gate on mixed PDF with zero semantic calls — PASS
+- Probe 6: Visual safety gate on vision_fallback_recommended metadata flag — PASS
+- Probe 7: Semantic cannot unblock sticky deterministic conflicts — PASS
+- Probe 8: Semantic ungrounded fabrication attempt strictly rejected — PASS
+- Probe 9: Non-mutating parsing preserves CLASSIFIED status — PASS
+- Probe 10: Uploaded source bytes strictly immutable across pipeline — PASS
+- Probe 11: Normal logs strictly sanitize customer data and exceptions — PASS
+- Probe 12: Atomic transaction rollback on repository write failure — PASS
+- Probe 13: CAS re-extraction guards reject stale ID and mismatched hash — PASS
+- Probe 14: Cross-document provenance contamination strictly rejected — PASS
+
+### 3. Full Regression Suite
+- **616 passed, 0 failed, 0 skipped, 2 warnings** in 26.63s (Python 3.13.14, pytest 9.1.1).
+
+---
+
+## Definition of Done
+
+- [x] End-to-end native-text PDF integration verified
+- [x] Excel XLSX and XLS integration verified
+- [x] Safe ResolvedPdfDocument visual integration verified
+- [x] Unresolved visual review & zero semantic calls verified
+- [x] Visual metadata integrity regression fixed in `_resolve_pdf`
+- [x] Canonical provenance and persistence round-trip verified
+- [x] Persistence history & atomic rollback verified
+- [x] Intentional CAS re-extraction guards verified
+- [x] Semantic fake-provider boundary & sticky conflicts verified
+- [x] Source-file immutability and privacy in logs verified
+- [x] Production composition from document_id verified
+- [x] 50 new integration tests added (21 True E2E, 29 Cross-Module)
+- [x] Full regression suite green (616 passed, 2 warnings)
+- [x] 14/14 independent adversarial probes passed
+- [x] Antigravity independent review: APPROVE
+- [x] Project Leader approval: APPROVE
+- [x] GitHub Pull Request #6 merged into main (commit `be6c7d9`)
+
+---
+
+## Closure summary
+
+- **Status**: CLOSED / DONE
+- **Date**: 2026-10-29
+- **Merged PR**: Pull Request #6 (commit `be6c7d9`)
+- **Developer**: Codex — Main Developer
+- **Review Decision**: Antigravity — Independent Technical Reviewer / QA — APPROVE
+- **Architectural Approval**: Project Leader — APPROVE
+- **Authoritative Baseline after TASK-006F**: 616 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1)
+

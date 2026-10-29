@@ -186,10 +186,10 @@ TASK-006B — DONE (Merged via PR #2, commit 29c4da2)
 TASK-006C — DONE (Merged via PR #3, commit 8bbb7f8)
 TASK-006D — DONE (Merged via PR #4, commit cd875b9)
 TASK-006E — DONE (Merged via PR #5, commit b6932c6)
-TASK-006F — TODO
+TASK-006F — DONE (Merged via PR #6, commit be6c7d9)
 ```
 
-Current authoritative baseline for TASK-006F: 566 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1).
+Authoritative baseline after TASK-006F: 616 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 After each child is approved:
 
@@ -212,9 +212,9 @@ TASK-006 is DONE only when:
 - [x] TASK-006C DONE
 - [x] TASK-006D DONE
 - [x] TASK-006E DONE
-- [ ] TASK-006F DONE
-- [ ] final Invoice extraction flow passes full regression
-- [ ] no unresolved CRITICAL/HIGH issue
+- [x] TASK-006F DONE
+- [x] final Invoice extraction flow passes full regression
+- [x] no unresolved CRITICAL/HIGH issue
 - [ ] Project Leader closes the epic
 
 ---
