@@ -38,6 +38,12 @@ class DocumentClassificationService:
             result = self.classifier.classify(
                 resolved_doc, filename=source_document.original_filename
             )
+            # Revalidate mutable outputs before authorizing source metadata.
+            result = DocumentClassificationResult.model_validate(
+                result.model_dump(mode="python", warnings="error")
+            )
+            if result.document_id != document_id:
+                raise ValueError("Classification result identity is inconsistent.")
 
             vision_requires_review = (
                 isinstance(resolved_doc, ResolvedPdfDocument)
