@@ -26,19 +26,22 @@ from pydantic import (
 )
 from pydantic_core import PydanticSerializationError
 
+from customs_ai.classification.enums import DocumentType
 from customs_ai.extraction.enums import ExtractionStatus
 from customs_ai.extraction.models import (
     InvoiceHeaderExtractionResult,
     InvoiceItemExtractionResult,
 )
+from customs_ai.extraction.packing_models import PackingListHeaderExtractionResult
 from customs_ai.ingestion.enums import ProcessingStatus
 from customs_ai.ingestion.models import SourceDocument
 
-ExtractionResult = InvoiceHeaderExtractionResult | InvoiceItemExtractionResult
+ExtractionResult = InvoiceHeaderExtractionResult | InvoiceItemExtractionResult | PackingListHeaderExtractionResult
 _RESULT_ADAPTER = TypeAdapter(ExtractionResult)
 _RESULT_TYPES = {
-    "invoice": InvoiceHeaderExtractionResult,
-    "invoice_items": InvoiceItemExtractionResult,
+    (1, "invoice"): InvoiceHeaderExtractionResult,
+    (1, "invoice_items"): InvoiceItemExtractionResult,
+    (2, "packing_list"): PackingListHeaderExtractionResult,
 }
 _INVALID_RESULT = "Invalid extraction result."
 _INVALID_SERIALIZED = "Invalid serialized extraction result."
@@ -66,11 +69,12 @@ def _fresh_result(value: Any) -> ExtractionResult:
     """Revalidate a Python snapshot, including pre-existing nested instances."""
     try:
         result = _RESULT_ADAPTER.validate_python(value)
-        model = (
-            InvoiceHeaderExtractionResult
-            if isinstance(result, InvoiceHeaderExtractionResult)
-            else InvoiceItemExtractionResult
-        )
+        if isinstance(result, PackingListHeaderExtractionResult):
+            model = PackingListHeaderExtractionResult
+        elif isinstance(result, InvoiceHeaderExtractionResult):
+            model = InvoiceHeaderExtractionResult
+        else:
+            model = InvoiceItemExtractionResult
         result = model.model_validate(result.model_dump(mode="python", warnings="error"))
         _check_finite(result.model_dump(mode="python"))
         for candidate in result.candidates:
@@ -78,6 +82,15 @@ def _fresh_result(value: Any) -> ExtractionResult:
         return result
     except (ValueError, TypeError, OverflowError, PydanticSerializationError):
         raise ValueError(_INVALID_RESULT) from None
+
+
+def result_document_type(result: ExtractionResult) -> DocumentType:
+    """Return the persisted result family; never infer it from overlapping fields."""
+    if isinstance(result, PackingListHeaderExtractionResult):
+        return DocumentType.PACKING_LIST
+    if isinstance(result, (InvoiceHeaderExtractionResult, InvoiceItemExtractionResult)):
+        return DocumentType.COMMERCIAL_INVOICE
+    raise ValueError(_INVALID_RESULT)
 
 
 def _check_finite(value: Any) -> None:
@@ -277,9 +290,10 @@ def serialize_result(result: ExtractionResult) -> str:
         data = validated.model_dump(mode="json")
         for candidate, source in zip(data["candidates"], validated.candidates, strict=True):
             candidate["typed_value"] = _encode_value(source.typed_value)
+        packing = isinstance(validated, PackingListHeaderExtractionResult)
         envelope = {
-            "format_version": 1,
-            "result_type": "invoice" if isinstance(validated, InvoiceHeaderExtractionResult) else "invoice_items",
+            "format_version": 2 if packing else 1,
+            "result_type": "packing_list" if packing else "invoice" if isinstance(validated, InvoiceHeaderExtractionResult) else "invoice_items",
             "result": data,
         }
         return json.dumps(envelope, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
@@ -295,18 +309,32 @@ def deserialize_result(serialized: str) -> ExtractionResult:
         envelope = json.loads(serialized, object_pairs_hook=_unique_object, parse_constant=_reject_constant)
         if type(envelope) is not dict or set(envelope) != {"format_version", "result_type", "result"}:
             raise ValueError(_INVALID_SERIALIZED)
-        if type(envelope["format_version"]) is not int or envelope["format_version"] != 1:
+        if type(envelope["format_version"]) is not int:
             raise ValueError(_INVALID_SERIALIZED)
         kind = envelope["result_type"]
-        if not isinstance(kind, str) or kind not in _RESULT_TYPES:
+        if not isinstance(kind, str) or (envelope["format_version"], kind) not in _RESULT_TYPES:
             raise ValueError(_INVALID_SERIALIZED)
+        model = _RESULT_TYPES[envelope["format_version"], kind]
         data = envelope["result"]
         if type(data) is not dict or type(data.get("candidates")) is not list:
             raise ValueError(_INVALID_SERIALIZED)
+        # Keep a canonical JSON snapshot before native candidate tags are decoded.
+        # V2 rejects coercions/missing fields not emitted by its strict writer.
+        wire = json.dumps(envelope, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
         for candidate in data["candidates"]:
             if type(candidate) is not dict or "typed_value" not in candidate:
                 raise ValueError(_INVALID_SERIALIZED)
             candidate["typed_value"] = _decode_value(candidate["typed_value"])
-        return _fresh_result(_RESULT_TYPES[kind].model_validate(data))
+        if model is PackingListHeaderExtractionResult:
+            if type(data.get("status")) is not str:
+                raise ValueError(_INVALID_SERIALIZED)
+            data["status"] = ExtractionStatus(data["status"])
+        result = _fresh_result(model.model_validate(data))
+        if model is PackingListHeaderExtractionResult:
+            expected = json.dumps(json.loads(serialize_result(result)), ensure_ascii=False,
+                                  allow_nan=False, sort_keys=True, separators=(",", ":"))
+            if wire != expected:
+                raise ValueError(_INVALID_SERIALIZED)
+        return result
     except (ValueError, TypeError, InvalidOperation, OverflowError, RecursionError):
         raise ValueError(_INVALID_SERIALIZED) from None
