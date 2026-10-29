@@ -192,13 +192,21 @@ Không commit:
 
 ## 8. Current Status
 
-Current phase: `TASK-007 — Packing List Extraction` (Phase: `V1 — Document Understanding`)
+Current phase: `TASK-007 — Packing List Extraction` (Phase: `V1 — Document Understanding` — DONE)
 
-Current task: `TASK-007 — Packing List Extraction (EPIC)` (IN_PROGRESS — Tất cả 5 child tasks TASK-007A..E đã hoàn thành và merged; chuẩn bị nghiệm thu đóng Epic)
+Current task: `TASK-007 — Packing List Extraction (EPIC)` (DONE — Nghiệm thu và đóng Epic; PR #7–#11 merged; 1422 passed, 2 warnings)
 
 Authoritative baseline: 1422 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
+> [!NOTE]
+> **Phạm vi hoàn thành V1 của TASK-007:**
+> Trích xuất bảng hàng hóa từ PDF (`PDF_PACKING_ITEMS_UNSUPPORTED`), đối soát chéo chứng từ (cross-document matching), chuẩn hóa dữ liệu nâng cao (normalization), và các quy tắc nghiệp vụ hải quan/thuế (customs/HS/VAT rules) nằm ngoài phạm vi hoàn thành của Epic TASK-007 và được hoãn lại cho các giai đoạn tiếp theo.
+
 Recently completed:
+- `TASK-007 — Packing List Extraction (EPIC)` (DONE — Hoàn thành toàn diện Epic qua PR #7–#11, merge commit cuối `6d60351`)
+  - Hoàn thành đầy đủ 5 nhiệm vụ thành phần: TASK-007A (Foundation/Contracts), TASK-007B (Deterministic Headers), TASK-007C (Deterministic Excel Items), TASK-007D (Service & Persistence Envelope v2), TASK-007E (Integration & Regression).
+  - Đảm bảo 100% tính tương thích ngược với luồng trích xuất Commercial Invoice v1; bảo vệ tính bất biến của source file và lưu trữ an toàn với SQLite schema v0.1.
+  - Bộ kiểm thử toàn hệ thống: 1422 passed, 2 warnings; 49/50 independent adversarial QA probes passed (1 variant NOT RUN do giới hạn quyền Windows symlink, thay thế bằng NTFS junction PASS).
 - `TASK-007E — Packing List Integration & Regression` (DONE — Merged via PR #11, commit `6d60351`)
   - Tích hợp toàn diện pipeline trích xuất Packing List production từ byte upload qua `IngestionService`, phân loại `build_classification_service`, phân giải trực quan, bóc tách deterministic headers/items, lưu trữ qua codec envelope v2 vào SQLite, đến truy xuất lại từ `DocumentExtractionRepository`.
   - Kiểm thử tích hợp PDF native 1 và 2 trang: trích xuất chính xác 16 header canonical, bảo toàn số trang vật lý, bỏ qua hoàn toàn OCR khi text layer sạch; tuân thủ nghiêm ngặt giới hạn V1 chưa hỗ trợ bảng hàng trong PDF (`PDF_PACKING_ITEMS_UNSUPPORTED`, `items=[]`, `NEEDS_REVIEW`).
