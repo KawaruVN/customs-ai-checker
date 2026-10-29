@@ -194,9 +194,21 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006D — Extraction Persistence & State` (IN_PROGRESS; parent epic: TASK-006; Codex — Main Developer, Antigravity — Technical Reviewer)
+Current task: `TASK-006D — Extraction Persistence & State (IN_PROGRESS; Codex Main Developer; Antigravity Independent Reviewer)`
+
+Authoritative baseline for TASK-006D: 291 passed, 0 failed, 0 skipped, 2 warnings.
 
 Recently completed:
+- `TASK-006C — Invoice Item Tables` (DONE — Merged via PR #3, commit `8bbb7f8`)
+  - Conservative extraction of `InvoiceItem` rows from generic Excel item tables (`ParsedWorkbook`).
+  - Table-header candidate discovery at arbitrary row/column positions across visible sheets using approved EN/VI/ZH item aliases.
+  - Dual-constraint header validation (requires identity/content and numeric fields; `NO + QTY` alone is insufficient).
+  - Grounded body product identity requirement (descriptions made solely of numbers do not certify a table).
+  - Exact summary boundaries (`TOTAL`, `GRAND TOTAL`, `TỔNG CỘNG`, `合计`) and subtotal flags (`ITEM_SUBTOTAL_BOUNDARY`); product safety for names prefixed with total (`TOTALIZER`, `TOTAL CONTROL`, `TOTAL LOSS`).
+  - Strict abstention on competing tables across sheets or within same sheet (`MULTIPLE_ITEM_TABLES`), compound/duplicate columns, and merged headers.
+  - Conservative formula policy: formula cells/text never act as headers; formula values flag `UNRESOLVED_ITEM_FORMULA` with `NEEDS_REVIEW` and retain raw expressions in candidates.
+  - Full provenance across all 14 canonical fields (`source_document_id`, `sheet`, `coordinate`, `confidence=0.95`).
+  - Test suite: 42 new focused tests, 291 full-suite tests passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 42 independent probes verified.
 - `TASK-006B — Deterministic Invoice Headers` (DONE — Merged via PR #2, commit `29c4da2`)
   - Deterministic invoice header and party extraction from `ParsedPdfDocument`, safe `ResolvedPdfDocument`, and `ParsedWorkbook`.
   - Strict party role separation for seller, buyer, and ship-to (MASTER_SPEC.md:499).
