@@ -192,9 +192,9 @@ Không commit:
 
 ## 8. Current Status
 
-Current phase: `TASK-007 — Packing List Extraction` (Phase: `V1 — Document Understanding` — DONE)
+Current phase: `TASK-008 — Transport Document Extraction` (Phase: `V1 — Document Understanding`)
 
-Current task: `TASK-007 — Packing List Extraction (EPIC)` (DONE — Nghiệm thu và đóng Epic; PR #7–#11 merged; 1422 passed, 2 warnings)
+Current task: `TASK-008A — Transport Foundation & Contracts` (TODO — Khởi tạo nền tảng trích xuất B/L & AWB, aliases đa ngữ EN/VI/ZH, typed contracts; Parent Epic: TASK-008)
 
 Authoritative baseline: 1422 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
