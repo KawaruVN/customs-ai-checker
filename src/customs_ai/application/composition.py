@@ -38,3 +38,16 @@ def build_invoice_extraction_service(
         vision_service=vision_service_factory(repo),
         semantic_provider=semantic_provider,
     )
+
+
+def build_packing_extraction_service(repository: SourceDocumentRepository | None = None):
+    """Build the approved local Packing path; no semantic provider is supported."""
+    from customs_ai.application.packing_extraction import PackingExtractionService
+    from customs_ai.repositories.document_extractions import DocumentExtractionRepository
+
+    repo = repository if repository is not None else SourceDocumentRepository()
+    return PackingExtractionService(
+        repository=repo, parsing_service=DocumentParsingService(repo),
+        classifier=DeterministicClassifier(load_classification_config()),
+        extraction_repository=DocumentExtractionRepository(), vision_service=vision_service_factory(repo),
+    )
