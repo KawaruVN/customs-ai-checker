@@ -1,4 +1,5 @@
 from datetime import date
+import datetime
 from decimal import Decimal
 from typing import Any, Generic, Literal, TypeVar
 
@@ -108,7 +109,7 @@ class PackingItem(BaseDomainModel):
 
 class PackingList(BaseDomainModel):
     packing_list_number: CanonicalField[str] | None = None
-    date: CanonicalField[date] | None = None
+    date: CanonicalField[datetime.date] | None = None
     seller: Party | None = None
     buyer: Party | None = None
     shipment_reference: CanonicalField[str] | None = None

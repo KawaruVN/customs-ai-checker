@@ -1,0 +1,148 @@
+# Packing List alias vocabulary only: document interpretation belongs to 007B/C.
+# EN / VI / ZH, with explicit role labels and no fixed customer coordinates.
+# normalize_alias changes case/whitespace only; punctuation remains literal.
+# Header/item weights share labels in separate contexts; no context is inferred.
+# invoice_references is the canonical list path, not a scalar invoice number.
+headers:
+  packing_list_number:
+    - "PACKING LIST NO"
+    - "PACKING LIST NUMBER"
+    - "P/L NO"
+    - "SỐ PHIẾU ĐÓNG GÓI"
+    - "装箱单号"
+    - "装箱单编号"
+  date:
+    - "PACKING LIST DATE"
+    - "DATE OF PACKING LIST"
+    - "NGÀY PHIẾU ĐÓNG GÓI"
+    - "装箱单日期"
+  seller.name:
+    - "SELLER"
+    - "NGƯỜI BÁN"
+    - "卖方"
+  seller.tax_id:
+    - "SELLER TAX ID"
+    - "SELLER VAT NO"
+    - "MÃ SỐ THUẾ NGƯỜI BÁN"
+    - "卖方税号"
+  seller.address:
+    - "SELLER ADDRESS"
+    - "ĐỊA CHỈ NGƯỜI BÁN"
+    - "卖方地址"
+  buyer.name:
+    - "BUYER"
+    - "PURCHASER"
+    - "NGƯỜI MUA"
+    - "买方"
+  buyer.tax_id:
+    - "BUYER TAX ID"
+    - "BUYER VAT NO"
+    - "MÃ SỐ THUẾ NGƯỜI MUA"
+    - "买方税号"
+  buyer.address:
+    - "BUYER ADDRESS"
+    - "ĐỊA CHỈ NGƯỜI MUA"
+    - "买方地址"
+  shipment_reference:
+    - "SHIPMENT REFERENCE"
+    - "SHIPMENT REF"
+    - "MÃ THAM CHIẾU LÔ HÀNG"
+    - "装运参考号"
+  invoice_references:
+    - "INVOICE NO"
+    - "INVOICE NO."
+    - "INVOICE REF."
+    - "INVOICE REFERENCES"
+    - "REFER TO INVOICE"
+    - "SỐ HÓA ĐƠN THAM CHIẾU"
+    - "发票号码"
+    - "参考发票"
+  package_count:
+    - "TOTAL PACKAGES"
+    - "NO. OF PACKAGES"
+    - "PACKAGE COUNT"
+    - "TỔNG SỐ KIỆN"
+    - "SỐ LƯỢNG KIỆN"
+    - "总件数"
+    - "包装件数"
+  package_type:
+    - "PACKAGE TYPE"
+    - "TYPE OF PACKAGING"
+    - "LOẠI BAO BÌ"
+    - "包装类型"
+  gross_weight:
+    - "TOTAL GROSS WEIGHT"
+    - "GROSS WEIGHT"
+    - "G.W."
+    - "TỔNG TRỌNG LƯỢNG CẢ BÌ"
+    - "TRỌNG LƯỢNG CẢ BÌ"
+    - "总毛重"
+    - "毛重"
+  net_weight:
+    - "TOTAL NET WEIGHT"
+    - "NET WEIGHT"
+    - "N.W."
+    - "TỔNG TRỌNG LƯỢNG TỊNH"
+    - "TRỌNG LƯỢNG TỊNH"
+    - "总净重"
+    - "净重"
+  dimensions:
+    - "DIMENSIONS"
+    - "PACKAGE DIMENSIONS"
+    - "KÍCH THƯỚC KIỆN HÀNG"
+    - "包装尺寸"
+    - "尺寸"
+  volume:
+    - "TOTAL VOLUME"
+    - "VOLUME"
+    - "CBM"
+    - "M3"
+    - "TỔNG THỂ TÍCH"
+    - "THỂ TÍCH"
+    - "总体积"
+    - "体积"
+
+items:
+  item_code:
+    - "ITEM CODE"
+    - "PRODUCT CODE"
+    - "MÃ HÀNG"
+    - "货号"
+    - "商品编码"
+  description:
+    - "DESCRIPTION"
+    - "DESCRIPTION OF GOODS"
+    - "MÔ TẢ HÀNG HÓA"
+    - "品名"
+    - "货物描述"
+  quantity:
+    - "QUANTITY"
+    - "QTY"
+    - "SỐ LƯỢNG"
+    - "数量"
+  unit:
+    - "UNIT"
+    - "UOM"
+    - "ĐƠN VỊ TÍNH"
+    - "单位"
+  package_number:
+    - "PACKAGE NO."
+    - "PACKAGE NUMBER"
+    - "CARTON NO."
+    - "BOX NO."
+    - "SỐ HIỆU KIỆN"
+    - "MÃ KIỆN"
+    - "箱号"
+    - "包装编号"
+  gross_weight:
+    - "ITEM GROSS WEIGHT"
+    - "GROSS WEIGHT"
+    - "G.W."
+    - "TRỌNG LƯỢNG CẢ BÌ"
+    - "毛重"
+  net_weight:
+    - "ITEM NET WEIGHT"
+    - "NET WEIGHT"
+    - "N.W."
+    - "TRỌNG LƯỢNG TỊNH"
+    - "净重"
