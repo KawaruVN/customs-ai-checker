@@ -5,7 +5,7 @@ import zipfile
 
 from openpyxl import load_workbook
 from openpyxl.cell.cell import Cell
-from openpyxl.utils import get_column_letter
+from openpyxl.utils import column_index_from_string, get_column_letter
 from openpyxl.utils.exceptions import InvalidFileException
 
 from customs_ai.parsers.errors import FileCorruptedError, ParserFailedError
@@ -56,11 +56,15 @@ class XlsxParser:
                     for row_index, dimension in worksheet.row_dimensions.items()
                     if dimension.hidden
                 )
-                hidden_columns = sorted(
-                    column_key
+                hidden_columns = sorted({
+                    get_column_letter(column_index)
                     for column_key, dimension in worksheet.column_dimensions.items()
                     if dimension.hidden
-                )
+                    for column_index in range(
+                        dimension.min or column_index_from_string(column_key),
+                        (dimension.max or column_index_from_string(column_key)) + 1,
+                    )
+                })
 
                 sheets.append(
                     ParsedSheet(
