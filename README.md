@@ -194,11 +194,21 @@ Không commit:
 
 Current phase: `TASK-007 — Packing List Extraction` (Phase: `V1 — Document Understanding`)
 
-Current task: `TASK-007E — Packing Integration & Regression` (TODO — Công việc tiếp theo; Parent Epic: TASK-007)
+Current task: `TASK-007 — Packing List Extraction (EPIC)` (IN_PROGRESS — Tất cả 5 child tasks TASK-007A..E đã hoàn thành và merged; chuẩn bị nghiệm thu đóng Epic)
 
-Authoritative baseline: 1327 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+Authoritative baseline: 1422 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 Recently completed:
+- `TASK-007E — Packing List Integration & Regression` (DONE — Merged via PR #11, commit `6d60351`)
+  - Tích hợp toàn diện pipeline trích xuất Packing List production từ byte upload qua `IngestionService`, phân loại `build_classification_service`, phân giải trực quan, bóc tách deterministic headers/items, lưu trữ qua codec envelope v2 vào SQLite, đến truy xuất lại từ `DocumentExtractionRepository`.
+  - Kiểm thử tích hợp PDF native 1 và 2 trang: trích xuất chính xác 16 header canonical, bảo toàn số trang vật lý, bỏ qua hoàn toàn OCR khi text layer sạch; tuân thủ nghiêm ngặt giới hạn V1 chưa hỗ trợ bảng hàng trong PDF (`PDF_PACKING_ITEMS_UNSUPPORTED`, `items=[]`, `NEEDS_REVIEW`).
+  - Kiểm thử tích hợp bảng tính Excel XLSX và XLS: nhận diện bảng hàng dịch chuyển tọa độ (shifted offsets), nhiều sheet, dữ liệu đa ngữ (EN, VI, ZH); bảo vệ toàn diện trước ô ẩn, ô công thức (giữ biểu thức trong candidate, không tin cậy giá trị cache), ô gộp và các bảng cạnh tranh (`MULTIPLE_PACKING_TABLES`).
+  - Cổng an toàn phân loại: nội dung chứng từ áp đảo tên file đánh lừa; từ chối dứt khoát tài liệu sai hoặc chưa phân loại; sửa lỗi hợp đồng danh tính phân loại (E-01) và revalidation confidence NaN (E-02).
+  - Cổng an toàn trực quan: giữ tính review dính (`requires_review=True`) cho các trang scan/chất lượng kém; từ chối hoặc review bảo thủ khi metadata trực quan xung đột/bị sửa đổi.
+  - Phân định rõ ràng ngữ cảnh tài liệu và ngữ cảnh dòng hàng: tách biệt rạch ròi tổng số kiện, trọng lượng cả bì/tịnh của chứng từ với số lượng và trọng lượng dòng hàng.
+  - Chu trình lưu trữ và tương thích ngược Invoice v1: kiểm chứng round-trip envelope v2 `(2, "packing_list")`; đồng tồn tại an toàn với bản ghi Invoice v1 trong cùng database mà không ghi đè hay biến đổi; đảm bảo duy nhất 1 bản ghi active qua partial index `one_active_extraction_per_document`; rollback toàn vẹn khi gặp trigger abort.
+  - Bất biến nguồn và bảo mật: hash SHA-256 của file tải lên không đổi trước và sau trích xuất; chặn đứng path traversal và directory link escape qua `resolve_source_path`; không rò rỉ dữ liệu nhạy cảm của khách hàng trong log.
+  - Bộ kiểm thử: 95 test cases integration mới (26 native/excel, 28 visual safety, 15 cross-module, 17 persistence history, 9 source security), 1422 tests full-suite passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 49/50 independent adversarial scenarios passed, 1 variant NOT RUN (symlink native do đặc quyền Windows, thay thế bằng NTFS junction passed 100%).
 - `TASK-007D — Packing List Service & Persistence` (DONE — Merged via PR #10, commit `f52ef03`)
   - Xây dựng tầng application orchestration (`PackingExtractionService`, `build_packing_extraction_service`) kết hợp deterministic headers (TASK-007B) và Excel item tables (TASK-007C) từ `SourceDocument` ID có căn cứ.
   - Cổng phân loại kép (classification gate): chỉ xử lý tài liệu được phân loại an toàn là `PACKING_LIST` với confidence >= 0.50; từ chối dứt khoát tài liệu sai nội dung (Invoice mang tên Packing List) mà không ghi nhận attempt hay làm thay đổi metadata.

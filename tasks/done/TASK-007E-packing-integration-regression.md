@@ -1,17 +1,18 @@
 # TASK-007E — Packing List Integration & Regression
 
-Status: IN_PROGRESS  
+Status: DONE  
 Priority: P1  
 Parent: TASK-007  
-Developer: Codex  
-Reviewer: Antigravity  
+Developer: Codex — Main Developer  
+Reviewer: Antigravity — Independent Technical Reviewer / QA (APPROVE)  
+Final Approver: ChatGPT — Project Leader / Architect (APPROVE FOR MERGE)  
+Completed date: 2026-10-29  
+Pull Request: PR #11 (Merged into main)  
+Implementation Commit: `8cf5b3fbc491303856f195e5f17d75cdc3cf32b9`  
+Merge Commit: `6d603511243c02d4a913a1a9979f1bf9fe41085d`  
+Pre-task baseline: 1327 passed / 0 failed / 0 skipped / 2 warnings  
+Post-task baseline: 1422 passed / 0 failed / 0 skipped / 2 warnings  
 Dependencies: TASK-007D approved and merged
-
-Developer role: Codex — Main Developer  
-Reviewer role: Antigravity — Independent Technical Reviewer / QA  
-Final Approver: ChatGPT — Project Leader / Architect  
-Development date: 2026-10-29  
-Pre-task baseline: 1327 passed / 0 failed / 0 skipped / 2 warnings
 
 ## Objective and inputs
 
@@ -290,3 +291,28 @@ Inspect the fresh-process side-effect assertions and privacy sentinels.
 No commit, push, PR, merge or task/epic closure is performed. Parent Epic and README
 are unchanged. Suggested owner commit summary:
 TASK-007E: integrate packing extraction and complete regression.
+
+## Task closure and sign-off
+
+- Status: DONE
+- Completed: 2026-10-29
+- Developer: Codex — Main Developer
+- Independent Technical Reviewer: Antigravity — QA & Reviewer (APPROVE)
+- Final Approval Authority: ChatGPT — Project Leader / Architect (APPROVE FOR MERGE)
+- Pull Request: #11 merged into main
+- Implementation commit: `8cf5b3fbc491303856f195e5f17d75cdc3cf32b9`
+- Merge commit: `6d603511243c02d4a913a1a9979f1bf9fe41085d`
+- Merge timestamp: `2026-10-29T22:25:49+07:00`
+- Full test evidence: 1422 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1 in 63.49s).
+- 95 new integration tests added across 5 files:
+  - `tests/integration/test_packing_native_excel.py`: 26 passed
+  - `tests/integration/test_packing_visual_safety.py`: 28 passed
+  - `tests/integration/test_packing_cross_module_regression.py`: 15 passed
+  - `tests/integration/test_packing_persistence_history.py`: 17 passed
+  - `tests/integration/test_packing_source_security.py`: 9 passed
+- Independent adversarial probes: 49/50 scenarios PASS, 1 NOT RUN (A34 native symlink variant due to Windows unprivileged account `WinError 1314` constraint; real NTFS directory junction alternative verified PASS).
+- Production bug fixes:
+  - E-01: Classification result identity check in `src/customs_ai/classification/service.py`.
+  - E-02: Mutated NaN classification confidence revalidation.
+- Preserved developer implementation evidence, integration test matrix, and known limitations.
+- No unresolved CRITICAL/HIGH findings.

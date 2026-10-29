@@ -43,7 +43,7 @@ are not removed or newly authorized for extraction by this epic plan.
 | TASK-007B | DONE | Deterministic Packing List headers (PR #8, merge commit `3e7e1d8`) | TASK-007A approved and merged |
 | TASK-007C | DONE | Conservative deterministic Excel packing item tables (PR #9, merge commit `bde5e61`) | TASK-007A and TASK-007B approved and merged |
 | TASK-007D | DONE | Packing service composition and reviewed persistence support (PR #10, merge commit `f52ef03`) | TASK-007B and TASK-007C approved and merged |
-| TASK-007E | TODO | Production-path integration and full regression | TASK-007D approved and merged |
+| TASK-007E | DONE | Production-path integration and full regression (PR #11, merge commit `6d60351`) | TASK-007D approved and merged |
 
 Each child requires its own implementation handoff, independent review, Project
 Leader approval and merge before the next implementation begins. This proposed
@@ -90,5 +90,21 @@ No SQLite schema or codec change is made in TASK-007A.
 - No unresolved CRITICAL/HIGH issue remains and the Project Leader closes the
   epic after independent review and approved child merges.
 
-Authoritative baseline after TASK-007D: 1327 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1).
+
+## Child Completion Evidence
+
+With the successful completion and merge of child tasks TASK-007A through TASK-007E (PR #7, #8, #9, #10, and #11), the Packing List Extraction Epic has achieved all technical criteria:
+
+1. **Foundation & Contracts (TASK-007A):** Established canonical `PackingList`/`PackingItem` contracts, YAML configuration with strict party role separation, `normalize_alias`, `parse_decimal`, `parse_date`, and runtime type annotation for `PackingList.date`. (81 new tests, baseline 697 passed).
+2. **Deterministic Headers (TASK-007B):** Implemented deterministic extraction of all 16 canonical header paths from PDF, XLSX, and XLS with physical coordinates and page/cell provenance. Resolved openpyxl parser grouped hidden column handling. (265 new tests, baseline 962 passed).
+3. **Deterministic Excel Items (TASK-007C):** Implemented conservative extraction of 7 canonical item fields from Excel workbooks with dual-constraint candidate header validation, grounded product identity, exact summary boundaries, formula opaqueness, and multi-table abstention. (216 new tests, baseline 1178 passed).
+4. **Service & Persistence (TASK-007D):** Implemented `PackingExtractionService` with content-based reclassification gate, table-header context isolation, discriminated persistence envelope v2 (`(2, "packing_list")`), single-active enforcement via unique partial index `one_active_extraction_per_document`, monotonic attempt history, and CAS replacement. (149 new tests, baseline 1327 passed).
+5. **Integration & Regression (TASK-007E):** Fully verified end-to-end production path from byte upload through classification, read-only parsing, deterministic extraction, SQLite persistence, and fresh repository retrieval. (95 new integration tests, baseline 1422 passed).
+6. **Invoice Backward Compatibility:** Commercial Invoice v1 pipeline verified 100% green; shared SQLite database coexistence with zero payload rewriting or drift.
+7. **Storage History & Invariants:** Monotonic attempt numbering, single active record invariant, and atomic transaction rollback on simulated aborts verified.
+8. **Data Safety & Precision:** Lossless Decimal precision/scale tuples, date types, and leading-zero strings preserved.
+9. **Source Immutability & Visual Safety:** Source bytes unchanged before/after extraction; path traversal and directory link escapes blocked; visual uncertainty remains sticky with zero unverified canonical text.
+10. **Finding Status:** 0 unresolved CRITICAL or HIGH findings across all child tasks.
+
+Authoritative baseline after TASK-007E: 1422 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1).
 This epic remains IN_PROGRESS.
