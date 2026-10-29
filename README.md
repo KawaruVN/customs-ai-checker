@@ -194,11 +194,18 @@ Không commit:
 
 Current phase: `TASK-007 — Packing List Extraction` (Phase: `V1 — Document Understanding`)
 
-Current task: `TASK-007B — Deterministic Packing List Headers` (TODO — Công việc tiếp theo; Parent Epic: TASK-007)
+Current task: `TASK-007C — Deterministic Packing Item Tables` (TODO — Công việc tiếp theo; Parent Epic: TASK-007)
 
-Authoritative baseline: 697 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+Authoritative baseline: 962 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 Recently completed:
+- `TASK-007B — Deterministic Packing List Headers` (DONE — Merged via PR #8, commit `3e7e1d8`)
+  - Trích xuất deterministic header của Packing List từ PDF và Excel dựa trên canonical `PackingList` và 16 canonical paths đã phê duyệt trong `config/packing_extraction.yaml`.
+  - Phân định vai trò nghiêm ngặt giữa commercial parties (`seller`, `buyer`) và logistics roles (`SHIPPER`, `CONSIGNEE`, `NOTIFY PARTY` được đưa vào `_NON_HEADER_LABELS` để làm biên chắn bảo vệ dỿ liệu).
+  - Trích xuất danh sách tham chiếu hóa đơn (`invoice_references`) dạng list `CanonicalField[str]`, giữ nguyên từng token độc lập, không gộp mất mát hay suy diễn khoảng giá trị.
+  - Sửa lỗi parser openpyxl grouped hidden columns trong `src/customs_ai/parsers/excel.py` (mở rộng `min..max` chính xác sang từng ký tự cột), bảo vệ an toàn cho cả pipeline Packing List và Commercial Invoice.
+  - Chính sách visual safety và layout safety nghiêm ngặt: toàn bộ PDF abstains nếu có trang visual không an toàn; các ô công thức/ẩn/merged trong Excel được xử lý bảo thủ.
+  - Bộ kiểm thử: 265 test cases mới (112 PDF, 91 workbook, 54 adversarial, 8 parser), 962 tests full-suite passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 34/34 independent adversarial probes passed.
 - `TASK-007A — Packing List Extraction Foundation & Contracts` (DONE — Merged via PR #7, commit `57957a4`)
   - Thiết lập từ điển alias Packing List (`config/packing_extraction.yaml`) cho 16 trường header và 7 trường item bằng EN/VI/ZH với phân định vai trò nghiêm ngặt (seller/buyer tách biệt shipper/consignee; package count tách biệt quantity; gross weight tách biệt net weight; dimensions tách biệt volume).
   - Trình tải cấu hình độc lập với CWD, ngăn chặn trùng lặp key YAML và chặn mã độc thực thi (`_UniqueKeySafeLoader`).

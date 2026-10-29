@@ -1,17 +1,18 @@
 # TASK-007B — Deterministic Packing List Headers
 
-Status: IN_PROGRESS  
+Status: DONE  
 Priority: P1  
 Parent: TASK-007  
-Developer: Codex  
-Reviewer: Antigravity  
+Developer: Codex — Main Developer  
+Reviewer: Antigravity — Independent Technical Reviewer / QA (APPROVE — Revalidated)  
+Final Approver: ChatGPT — Project Leader / Architect (APPROVE)  
+Completed date: 2026-10-29  
+Pull Request: PR #8 (Merged into main)  
+Implementation Commit: `07e82862d85cbeef8b077e8605f87cf432f44804`  
+Merge Commit: `3e7e1d83155dab2da7bd6741df621c8d3be21dc5`  
+Pre-task baseline: 697 passed / 0 failed / 0 skipped / 2 warnings  
+Post-task baseline: 962 passed / 0 failed / 0 skipped / 2 warnings  
 Dependencies: TASK-007A approved and merged
-
-Developer role: Codex — Main Developer  
-Reviewer role: Antigravity — Independent Technical Reviewer / QA  
-Final Approver: ChatGPT — Project Leader / Architect  
-Development date: 2026-10-29  
-Pre-task baseline: 697 passed / 0 failed / 0 skipped / 2 warnings
 
 ## Objective and inputs
 
@@ -302,9 +303,23 @@ changes; all source/test files are exercised by final pytest.
   grouped XLSX metadata and entire-document unsafe visual abstention. Independently
   assess the stated source/parser boundaries and conservative layout limitations.
 
-## Review state and handoff
+## Task closure and sign-off
 
-IN_PROGRESS. Developer validation is not independent approval. No commit, push,
-merge or PR is performed; no task is marked DONE. Shared README and parent Epic
-are unchanged as instructed. Suggested owner commit summary:
-`TASK-007B: implement deterministic packing list headers`.
+- Status: DONE
+- Completed: 2026-10-29
+- Developer: Codex — Main Developer (APPROVE)
+- Independent Technical Reviewer: Antigravity — QA & Reviewer (APPROVE — Revalidated)
+- Final Approval Authority: ChatGPT — Project Leader / Architect (APPROVE)
+- Pull Request: #8 merged into main
+- Implementation commit: `07e82862d85cbeef8b077e8605f87cf432f44804`
+- Merge commit: `3e7e1d83155dab2da7bd6741df621c8d3be21dc5`
+- Full test evidence: 962 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+- 265 new tests added:
+  - `tests/unit/extraction/test_packing_headers_pdf.py`: 112 passed
+  - `tests/unit/extraction/test_packing_headers_workbook.py`: 91 passed
+  - `tests/unit/extraction/test_packing_headers_adversarial.py`: 54 passed
+  - `tests/unit/parsers/test_hidden_column_groups.py`: 8 passed
+- Independent adversarial probes: 34/34 passed (10 grouped hidden column probes P01–P10, 24 comprehensive probes A01–A24).
+- Production artifacts:
+  - `src/customs_ai/extraction/packing_headers.py`: DeterministicPackingHeaderExtractor implementing all 16 canonical paths, strict party separation, invoice reference list handling, formula/hidden cell shielding, and conservative layout boundaries.
+  - `src/customs_ai/parsers/excel.py`: Approved openpyxl grouped-hidden-column parser fix (min..max expansion to column letters).
