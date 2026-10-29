@@ -1,17 +1,18 @@
 # TASK-007D — Packing List Service & Persistence
 
-Status: IN_PROGRESS  
+Status: DONE  
 Priority: P1  
 Parent: TASK-007  
-Developer: Codex  
-Reviewer: Antigravity  
+Developer: Codex — Main Developer  
+Reviewer: Antigravity — Independent Technical Reviewer / QA (APPROVE)  
+Final Approver: ChatGPT — Project Leader / Architect (APPROVE)  
+Completed date: 2026-10-29  
+Pull Request: PR #10 (Merged into main)  
+Implementation Commit: `1e237f2f967cdb130fc8a067cd3957cf735e7e43`  
+Merge Commit: `f52ef033225a73aa57bca18cb7c336f66045e0a0`  
+Pre-task baseline: 1178 passed / 0 failed / 0 skipped / 2 warnings  
+Post-task baseline: 1327 passed / 0 failed / 0 skipped / 2 warnings  
 Dependencies: TASK-007B and TASK-007C approved and merged; TASK-006D/E contracts
-
-Developer role: Codex — Main Developer  
-Reviewer role: Antigravity — Independent Technical Reviewer / QA  
-Final Approver: ChatGPT — Project Leader / Architect  
-Development date: 2026-10-29  
-Pre-task baseline: 1178 passed / 0 failed / 0 skipped / 2 warnings
 
 ## Objective and inputs
 
@@ -283,3 +284,26 @@ normal logs; source byte hashes and full Invoice/Packing regression.
 Developer checks do not constitute independent approval. No commit, push, merge,
 PR or DONE status is authorized/performed. Owner commit summary:
 TASK-007D: implement packing extraction service and persistence.
+
+## Task closure and sign-off
+
+- Status: DONE
+- Completed: 2026-10-29
+- Developer: Codex — Main Developer (APPROVE)
+- Independent Technical Reviewer: Antigravity — QA & Reviewer (APPROVE)
+- Final Approval Authority: ChatGPT — Project Leader / Architect (APPROVE)
+- Pull Request: #10 merged into main
+- Implementation commit: `1e237f2f967cdb130fc8a067cd3957cf735e7e43`
+- Merge commit: `f52ef033225a73aa57bca18cb7c336f66045e0a0`
+- Full test evidence: 1327 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+- 149 new tests added:
+  - `tests/unit/application/test_packing_extraction_service.py`: 74 passed
+  - `tests/unit/repositories/test_packing_persistence.py`: 75 passed
+- Independent adversarial probes: 50/50 passed (A01–A50).
+- Production artifacts:
+  - `src/customs_ai/application/packing_extraction.py`: PackingExtractionService orchestrating preflight source verification, non-mutating parsing, visual safety, current content reclassification, table-header context isolation, canonical composition, and transactional persistence.
+  - `src/customs_ai/application/packing_models.py`: PackingExtractionRequest and PackingExtractionOutcome with strict snapshot revalidation and immutable outcome contracts.
+  - `src/customs_ai/application/composition.py`: build_packing_extraction_service factory wired with production dependencies.
+  - `src/customs_ai/repositories/extraction_models.py`: discriminated persistence codec supporting v1 Invoice and v2 Packing List wire payloads (`(2, "packing_list")`), strict canonical JSON wire verification, lossless Decimal/date/typed-value serialization, and result_document_type.
+  - `src/customs_ai/repositories/document_extractions.py`: single-active enforcement, append-only monotonic attempt numbering, atomic transaction lifecycle with BEGIN IMMEDIATE, source/result family compatibility, and preservation of prior active records upon FAILED replacement.
+  - `docs/decisions/ADR-003-packing-service-persistence.md`: recorded architectural decision for discriminated persistence extension without DDL migrations.

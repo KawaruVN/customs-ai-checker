@@ -1,8 +1,11 @@
 # ADR-003 — Packing service and discriminated persistence
 
 Date: 2026-10-29  
+Status: Accepted (Reviewed and approved by Antigravity; approved by Project Leader; merged via PR #10, commit `f52ef033225a73aa57bca18cb7c336f66045e0a0`)  
+Developer: Codex — Main Developer  
+Reviewer: Antigravity — Independent Technical Reviewer / QA  
 Decision: Approved by Project Leader in the TASK-007D handoff  
-Implementation: Pending Antigravity independent review and final approval
+Implementation: Implemented, independently reviewed, approved, and merged in PR #10
 
 ## Context and decision
 

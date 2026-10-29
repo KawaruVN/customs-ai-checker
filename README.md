@@ -194,11 +194,20 @@ Không commit:
 
 Current phase: `TASK-007 — Packing List Extraction` (Phase: `V1 — Document Understanding`)
 
-Current task: `TASK-007D — Packing Service & Reviewed Persistence` (TODO — Công việc tiếp theo; Parent Epic: TASK-007)
+Current task: `TASK-007E — Packing Integration & Regression` (TODO — Công việc tiếp theo; Parent Epic: TASK-007)
 
-Authoritative baseline: 1178 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+Authoritative baseline: 1327 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 Recently completed:
+- `TASK-007D — Packing List Service & Persistence` (DONE — Merged via PR #10, commit `f52ef03`)
+  - Xây dựng tầng application orchestration (`PackingExtractionService`, `build_packing_extraction_service`) kết hợp deterministic headers (TASK-007B) và Excel item tables (TASK-007C) từ `SourceDocument` ID có căn cứ.
+  - Cổng phân loại kép (classification gate): chỉ xử lý tài liệu được phân loại an toàn là `PACKING_LIST` với confidence >= 0.50; từ chối dứt khoát tài liệu sai nội dung (Invoice mang tên Packing List) mà không ghi nhận attempt hay làm thay đổi metadata.
+  - Phân tầng an toàn trực quan PDF: PDF native sạch bỏ qua hoàn toàn OCR; tài liệu ảnh/scan yêu cầu kiểm tra toàn diện chất lượng và phân giải; tuân thủ chính sách V1 chưa hỗ trợ bảng hàng hóa trong PDF (`PDF_PACKING_ITEMS_UNSUPPORTED`, `items=[]`, `NEEDS_REVIEW`), tuyệt đối không bịa đặt số liệu.
+  - Tách biệt ngữ cảnh dòng hàng trong Excel: cách ly các dòng hàng hóa hợp lệ để nhãn cột trọng lượng trong bảng không bị nhận diện nhầm thành header chứng từ; bảo toàn đầy đủ provenance (sheet, cell, bounding box) và prefix `header.`/`items.` cho candidates.
+  - Mở rộng persistence codec có phân biệt (discriminated persistence envelope v2): hỗ trợ đồng thời v1 Invoice (`(1, invoice)`, `(1, invoice_items)`) và v2 Packing List (`(2, packing_list)`) mà không thay đổi DDL/schema SQLite (`schema_version = "0.1"` giữ nguyên).
+  - Bảo toàn toàn vẹn kiểu dữ liệu và độ chính xác: Decimal scale (`0.00`, 20 chữ số nguyên), ngày tháng (`datetime.date`), danh sách đa tham chiếu hóa đơn, và văn bản Unicode đa ngữ (Tiếng Việt, Tiếng Trung) qua round-trip SQLite thực tế; xác thực snapshot wire JSON khắt khe ngăn chặn ép kiểu ngầm.
+  - Chu trình giao dịch SQLite an toàn: cơ chế khóa ghi `BEGIN IMMEDIATE`; đảm bảo duy nhất 1 bản ghi active qua partial index; lịch sử attempt đơn điệu tăng dần; bảo vệ tối thượng cho bản ghi active khi gặp attempt `FAILED` (không deactive dữ liệu hợp lệ trước đó); rollback toàn diện khi trigger/commit thất bại.
+  - Bộ kiểm thử: 149 test cases mới (74 service, 75 persistence), 1327 tests full-suite passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 50/50 independent adversarial probes passed.
 - `TASK-007C — Deterministic Packing Item Tables` (DONE — Merged via PR #9, commit `bde5e61`)
   - Trích xuất bảng hàng hóa (item tables) của Packing List từ file Excel (XLSX, XLS) dựa trên canonical `PackingItem` và 7 trường canonical đã phê duyệt trong `config/packing_extraction.yaml`.
   - Cơ chế nhận diện bảng 2 tầng chặt chẽ: yêu cầu đồng thời cột định danh (item_code/description) và cột số lượng/trọng lượng; chỉ công nhận bảng hợp lệ khi có ít nhất một dòng dữ liệu thực tế chứa cả định danh và số liệu an toàn trên cùng một hàng.
