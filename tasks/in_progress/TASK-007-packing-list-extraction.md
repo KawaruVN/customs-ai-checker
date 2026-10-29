@@ -39,7 +39,7 @@ are not removed or newly authorized for extraction by this epic plan.
 
 | Child | Status | Scope | Dependencies |
 |---|---|---|---|
-| TASK-007A | IN_PROGRESS | Packing aliases, validation, typed result contracts and tests | TASK-006 DONE |
+| TASK-007A | DONE | Packing aliases, validation, typed result contracts and tests (PR #7, commit `57957a4`) | TASK-006 DONE |
 | TASK-007B | TODO | Deterministic Packing List headers | TASK-007A approved and merged |
 | TASK-007C | TODO | Conservative deterministic Excel packing item tables | TASK-007A and TASK-007B approved and merged |
 | TASK-007D | TODO | Packing service composition and reviewed persistence support | TASK-007B and TASK-007C approved and merged |
@@ -90,5 +90,5 @@ No SQLite schema or codec change is made in TASK-007A.
 - No unresolved CRITICAL/HIGH issue remains and the Project Leader closes the
   epic after independent review and approved child merges.
 
-Initial verified baseline: 616 passed, 0 failed, 0 skipped, 2 warnings. This epic
-is not DONE and is not approved by the developer.
+Authoritative baseline after TASK-007A: 697 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1).
+This epic remains IN_PROGRESS.

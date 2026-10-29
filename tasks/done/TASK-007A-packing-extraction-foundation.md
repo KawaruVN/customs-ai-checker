@@ -1,14 +1,18 @@
 # TASK-007A — Packing List Extraction Foundation & Contracts
 
-Status: IN_PROGRESS  
+Status: DONE  
 Priority: P1  
 Parent: TASK-007  
 Developer: Codex — Main Developer  
 Reviewer: Antigravity — Independent Technical Reviewer / QA  
-Final Approver: Project Leader  
+Final Approver: ChatGPT — Project Leader / Architect  
 Created: 2026-10-29  
+Completed: 2026-10-29  
+Merged PR: #7 (commit `57957a43bee76bb3e89c8afd30b06311650780c1`)  
 Dependencies: TASK-006 DONE  
-Baseline: 616 passed / 0 failed / 0 skipped / 2 warnings
+Pre-task baseline: 616 passed / 0 failed / 0 skipped / 2 warnings  
+Post-task baseline: 697 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1)  
+Independent adversarial probes: 27/27 PASS
 
 ## Objective
 
@@ -78,26 +82,26 @@ before use. No candidate claim is verified against a real source in this task.
 
 ## Acceptance criteria
 
-- AC-01: Canonical Packing and Invoice fields/structures remain unchanged, except
+- [x] AC-01: Canonical Packing and Invoice fields/structures remain unchanged, except
   the Project Leader-approved correction of PackingList.date's erroneous runtime
   annotation to CanonicalField[datetime.date]. No other canonical field or database
   schema change is authorized.
-- AC-02: All 16 approved header and seven item paths are supported in separate
+- [x] AC-02: All 16 approved header and seven item paths are supported in separate
   maps, without unauthorized business fields.
-- AC-03: EN/VI/ZH aliases preserve seller/buyer, package/quantity, gross/net,
+- [x] AC-03: EN/VI/ZH aliases preserve seller/buyer, package/quantity, gross/net,
   dimensions/volume and Packing-number/Invoice-reference distinctions.
-- AC-04: Unknown/missing paths, bad shapes, duplicate/conflicting normalized
+- [x] AC-04: Unknown/missing paths, bad shapes, duplicate/conflicting normalized
   aliases and empty/blank/non-string aliases fail validation.
-- AC-05: Invalid YAML fails safely and default loading is CWD-independent.
-- AC-06: Strict result models reuse canonical types/status/issues/candidates;
+- [x] AC-05: Invalid YAML fails safely and default loading is CWD-independent.
+- [x] AC-06: Strict result models reuse canonical types/status/issues/candidates;
   status is explicit and uncertain/missing evidence cannot imply default success.
-- AC-07: Invoice references and items retain list-valued canonical contracts;
+- [x] AC-07: Invoice references and items retain list-valued canonical contracts;
   independent instances do not share mutable defaults.
-- AC-08: Decimal/date, identifiers, raw data and provenance are preserved; malformed
+- [x] AC-08: Decimal/date, identifiers, raw data and provenance are preserved; malformed
   nested values and missing EXTRACTED provenance are rejected by the contracts.
-- AC-09: Focused negative tests cover the requirements and full regression keeps
+- [x] AC-09: Focused negative tests cover the requirements and full regression keeps
   all completed TASK-006 behavior green.
-- AC-10: TASK-007 epic and bounded TODO plans for B–E exist; no later child is
+- [x] AC-10: TASK-007 epic and bounded TODO plans for B–E exist; no later child is
   implemented or approved by this work.
 
 ## Tests and pre-flight evidence
@@ -215,5 +219,18 @@ Do not modify shared README or completed TASK-006 documentation.
 
 ## Review state
 
-IN_PROGRESS pending Antigravity independent review, Project Leader approval and
-merge. No developer self-approval, commit, push, PR creation or task closure.
+DONE — Approved by Antigravity (Independent Technical Reviewer / QA) and ChatGPT (Project Leader / Architect). Merged via Pull Request #7 (commit `57957a43bee76bb3e89c8afd30b06311650780c1`).
+
+---
+
+## Closure summary
+
+- **Status**: CLOSED / DONE
+- **Date**: 2026-10-29
+- **Merged PR**: Pull Request #7 (commit `57957a43bee76bb3e89c8afd30b06311650780c1`)
+- **Developer**: Codex — Main Developer
+- **Review Decision**: Antigravity — Independent Technical Reviewer / QA — APPROVE
+- **Architectural Approval**: ChatGPT — Project Leader / Architect — APPROVE
+- **Authoritative Baseline after TASK-007A**: 697 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1)
+- **Independent Adversarial Probes**: 27/27 PASSED
+- **Next Task**: TASK-007B — Deterministic Packing List Headers (TODO)

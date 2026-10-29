@@ -194,11 +194,18 @@ Không commit:
 
 Current phase: `TASK-007 — Packing List Extraction` (Phase: `V1 — Document Understanding`)
 
-Current task: `TASK-007A — Packing List Foundation` (TODO — Chưa triển khai; Parent Epic: TASK-007)
+Current task: `TASK-007B — Deterministic Packing List Headers` (TODO — Công việc tiếp theo; Parent Epic: TASK-007)
 
-Authoritative baseline: 616 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+Authoritative baseline: 697 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 Recently completed:
+- `TASK-007A — Packing List Extraction Foundation & Contracts` (DONE — Merged via PR #7, commit `57957a4`)
+  - Thiết lập từ điển alias Packing List (`config/packing_extraction.yaml`) cho 16 trường header và 7 trường item bằng EN/VI/ZH với phân định vai trò nghiêm ngặt (seller/buyer tách biệt shipper/consignee; package count tách biệt quantity; gross weight tách biệt net weight; dimensions tách biệt volume).
+  - Trình tải cấu hình độc lập với CWD, ngăn chặn trùng lặp key YAML và chặn mã độc thực thi (`_UniqueKeySafeLoader`).
+  - Sửa lỗi runtime type annotation cho `PackingList.date` (`CanonicalField[datetime.date]`) được Project Leader phê duyệt, khắc phục hiện tượng field name che khuất kiểu dữ liệu mà không làm thay đổi canonical schema hay database models.
+  - Xây dựng result contracts chặt chẽ (`PackingListHeaderExtractionResult`, `PackingItemExtractionResult`) với cơ chế kiểm soát status, issue gating và revalidation snapshot phòng thủ.
+  - Tái sử dụng trọn vẹn các thành phần đã được kiểm chứng từ TASK-006 (`normalize_alias`, `parse_decimal`, `parse_date`, `ExtractionStatus`, `ExtractionIssue`, `ExtractionCandidate`).
+  - Bộ kiểm thử: 81 test cases mới, 697 tests full-suite passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 27/27 adversarial probes độc lập passed.
 - `TASK-006 — Invoice Extraction (EPIC)` (DONE — 2026-10-29, all child tasks TASK-006A..F merged and verified)
   - Hoàn thành toàn diện pipeline trích xuất Commercial Invoice cho PDF và Excel.
   - Bao gồm: extraction primitives & config (006A), deterministic headers & party extraction (006B), Excel item tables (006C), transactional persistence & history (006D), application extraction service & visual/semantic safety gates (006E), và end-to-end integration & regression (006F).
