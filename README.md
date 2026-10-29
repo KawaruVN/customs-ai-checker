@@ -194,7 +194,7 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006C — Invoice Item Tables` (IN_PROGRESS; parent epic: TASK-006; Codex — Main Developer, Antigravity — Technical Reviewer)
+Current task: `TASK-006D — Extraction Persistence & State` (IN_PROGRESS; parent epic: TASK-006; Codex — Main Developer, Antigravity — Technical Reviewer)
 
 Recently completed:
 - `TASK-006B — Deterministic Invoice Headers` (DONE — Merged via PR #2, commit `29c4da2`)

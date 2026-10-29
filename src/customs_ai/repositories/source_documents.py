@@ -1,3 +1,4 @@
+from contextlib import closing
 from typing import Optional
 
 from customs_ai.ingestion.models import SourceDocument
@@ -44,14 +45,14 @@ class SourceDocumentRepository:
             document.parser_used,
             document.extraction_status,
         )
-        with get_connection() as connection:
+        with closing(get_connection()) as connection, connection:
             connection.execute(query, values)
             connection.commit()
 
     def find_by_shipment_and_hash(
         self, shipment_id: str, file_hash: str
     ) -> Optional[SourceDocument]:
-        with get_connection() as connection:
+        with closing(get_connection()) as connection, connection:
             row = connection.execute(
                 "SELECT * FROM source_documents WHERE shipment_id = ? AND file_hash = ?",
                 (shipment_id, file_hash),
@@ -59,7 +60,7 @@ class SourceDocumentRepository:
         return SourceDocument(**dict(row)) if row else None
 
     def get_by_document_id(self, document_id: str) -> Optional[SourceDocument]:
-        with get_connection() as connection:
+        with closing(get_connection()) as connection, connection:
             row = connection.execute(
                 "SELECT * FROM source_documents WHERE document_id = ?",
                 (document_id,),
@@ -80,7 +81,7 @@ class SourceDocumentRepository:
             WHERE document_id = ?
         """
         status_value = getattr(processing_status, "value", processing_status)
-        with get_connection() as connection:
+        with closing(get_connection()) as connection, connection:
             cursor = connection.execute(
                 query,
                 (status_value, parser_used, page_count, sheet_count, document_id),
@@ -102,7 +103,7 @@ class SourceDocumentRepository:
             WHERE document_id = ?
         """
         status_value = getattr(processing_status, "value", processing_status)
-        with get_connection() as connection:
+        with closing(get_connection()) as connection, connection:
             cursor = connection.execute(
                 query,
                 (detected_document_type, classification_confidence, status_value, document_id),

@@ -184,7 +184,7 @@ Current:
 TASK-006A — DONE (Merged via PR #1, commit 02a748e)
 TASK-006B — DONE (Merged via PR #2, commit 29c4da2)
 TASK-006C — IN_PROGRESS (Codex developer; Antigravity independent reviewer)
-TASK-006D — TODO
+TASK-006D — IN_PROGRESS (Codex developer; Antigravity independent reviewer)
 TASK-006E — TODO
 TASK-006F — TODO
 ```
