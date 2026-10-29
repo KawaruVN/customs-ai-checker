@@ -1,9 +1,9 @@
 # ADR-001 — Local extraction history and active state
 
 Date: 2026-10-28  
-Status: Implemented for TASK-006D; pending independent review  
-Developer: Codex  
-Reviewer: Antigravity
+Status: Accepted (Reviewed and approved by Antigravity; approved by Project Leader; merged via PR #4, commit `cd875b9`)  
+Developer: Codex — Main Developer  
+Reviewer: Antigravity — Independent Technical Reviewer / QA
 
 ## Context
 

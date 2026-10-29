@@ -194,11 +194,21 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006D — Extraction Persistence & State (IN_PROGRESS; Codex Main Developer; Antigravity Independent Reviewer)`
+Current task: `TASK-006E — Invoice Extraction Application Service` (TODO; parent epic: TASK-006)
 
-Authoritative baseline for TASK-006D: 291 passed, 0 failed, 0 skipped, 2 warnings.
+Authoritative baseline for TASK-006E: 435 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 Recently completed:
+- `TASK-006D — Extraction Persistence & State` (DONE — Merged via PR #4, commit `cd875b9`)
+  - Local extraction persistence and state management in SQLite repository layer (`document_extractions` table).
+  - Single active extraction per document enforced at database engine level via unique partial index (`WHERE is_active = 1`).
+  - Append-only extraction history with strictly monotonic per-document attempt numbering (`UNIQUE(document_id, attempt_number)`).
+  - Transactional atomicity: `BEGIN IMMEDIATE` writer lock; atomic deactivation, insert, and `SourceDocument` metadata update; explicit rowcount assertion (`rowcount == 1`) and full rollback on constraint, trigger, or commit errors.
+  - Distinct failure semantics: `FAILED` attempts are stored as inactive history (`is_active = 0`) and never deactivate or overwrite prior valid active extractions (`EXTRACTED` / `NEEDS_REVIEW`).
+  - Explicit re-extraction policy: initial save requires no active extraction; replacement requires exact `expected_active_extraction_id` plus optimistic source hash and status verification.
+  - Storage codec envelope v1 with explicit scalar type-tagging for candidate unions; full preservation of canonical `Decimal` scale/precision, dates, and multilingual CJK/Vietnamese text.
+  - Privacy and immutability: zero customer data in logs/exceptions; static sanitized error messages; no modification of source files.
+  - Test suite: 144 new focused repository tests, 435 full-suite tests passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 23 independent adversarial and concurrency probes verified.
 - `TASK-006C — Invoice Item Tables` (DONE — Merged via PR #3, commit `8bbb7f8`)
   - Conservative extraction of `InvoiceItem` rows from generic Excel item tables (`ParsedWorkbook`).
   - Table-header candidate discovery at arbitrary row/column positions across visible sheets using approved EN/VI/ZH item aliases.
