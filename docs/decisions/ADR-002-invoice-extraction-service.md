@@ -1,7 +1,9 @@
 # ADR-002 — Safe local invoice extraction composition
 
 Date: 2026-10-29  
-Status: Implemented for TASK-006E; pending independent review
+Status: Accepted (Reviewed and approved by Antigravity; approved by Project Leader; merged via PR #5, commit `b6932c6`)
+Developer: Codex — Main Developer
+Reviewer: Antigravity — Independent Technical Reviewer / QA
 
 ## Context
 

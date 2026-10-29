@@ -194,11 +194,20 @@ Không commit:
 
 Current phase: `V1 — Document Understanding`
 
-Current task: `TASK-006E — Invoice Extraction Service` (IN_PROGRESS; Codex Developer, Antigravity Reviewer; parent epic: TASK-006)
+Current task: `TASK-006F — Invoice Integration & Regression` (TODO; parent epic: TASK-006)
 
-Authoritative baseline for TASK-006E: 435 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+Authoritative baseline for TASK-006F: 566 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
 
 Recently completed:
+- `TASK-006E — Invoice Extraction Service` (DONE — Merged via PR #5, commit `b6932c6`)
+  - Application extraction service orchestration (`InvoiceExtractionService`, `build_invoice_extraction_service`).
+  - Non-mutating downstream read/parse pipeline (`parse_document_readonly`), preventing status downgrade from `CLASSIFIED`/`NEEDS_REVIEW` to `PARSED`.
+  - Content and metadata dual classification gate rejecting misclassified documents and misleading filenames.
+  - Visual quality and safety gates: unusable or conflicting visual pages terminate immediately with `NEEDS_REVIEW` and bypass semantic fallback with exactly 0 calls.
+  - Canonical invoice composition: deterministic headers (TASK-006B) and Excel item tables (TASK-006C) assembled with typed candidates and full provenance; PDF item extraction explicitly unsupported with `PDF_ITEMS_UNSUPPORTED` review flag.
+  - Semantic fallback grounding: role-labeled source extraction, strict raw/coordinate/type matching, fill-only policy rejecting overwrites or ungrounded proposals, sticky deterministic review issues.
+  - Transactional CAS persistence under `BEGIN IMMEDIATE` with `expected_active_extraction_id` and atomic `expected_source_document` snapshot verification.
+  - Test suite: 131 new focused tests, 566 full-suite tests passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 14 independent adversarial probes verified.
 - `TASK-006D — Extraction Persistence & State` (DONE — Merged via PR #4, commit `cd875b9`)
   - Local extraction persistence and state management in SQLite repository layer (`document_extractions` table).
   - Single active extraction per document enforced at database engine level via unique partial index (`WHERE is_active = 1`).
