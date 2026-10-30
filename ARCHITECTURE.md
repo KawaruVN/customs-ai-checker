@@ -7,6 +7,11 @@ Status: Draft
 Project: Customs AI Checker  
 Applies to: V1
 
+Amendment 2026-10-30: Sections 69–72 propose the architecture needed for the
+Owner's versioned arrival/declaration policy (MASTER_SPEC Section 61). Business
+requirements are Owner-approved; technical amendment review/merge/closure is pending.
+Descriptions of future modules are target design, not claims of implemented behavior.
+
 ---
 
 # 1. PURPOSE
@@ -1523,11 +1528,14 @@ TASK-004 Local PDF/Excel Parsers
 TASK-005 Document Classification
 TASK-006 Invoice Extraction
 TASK-007 Packing List Extraction
-TASK-008 Transport Document Extraction
+Docs amendment review / approval / merge / closure (before TASK-008A)
+TASK-008A -> B -> C -> D -> E Transport Document Extraction (B/L-AWB only)
+TASK-016A -> B -> C -> D Arrival Notice SEA/AIR & Operational Evidence
+TASK-017 Declaration Intake (structured/manual first)
 TASK-009 Normalization
-TASK-010 Item Matching
+TASK-010 Document Relationship + Item Matching
 TASK-011 Rule Engine Foundation
-TASK-012 Initial Cross-document Rules
+TASK-012 A Document-to-document; B Required source-to-declaration + coverage
 TASK-013 Report Generation
 TASK-014 Human Correction
 TASK-015 Golden Dataset Regression
@@ -1651,6 +1659,7 @@ Kiến trúc V1 đạt yêu cầu khi có thể xử lý flow:
 ```text
 Create Shipment
 → Upload Invoice + Packing List + Bill
+→ Obtain mandatory Arrival Notice SEA/AIR + declaration data for applicable workflow
 → Parse locally where possible
 → Classify documents
 → Extract structured data
@@ -1697,6 +1706,116 @@ No legal claim without verified evidence.
 ```
 
 ---
+
+# 69. ARRIVAL / DECLARATION AMENDMENT — BOUNDARIES
+
+See [ADR-004](docs/decisions/ADR-004-arrival-declaration-source-policy.md),
+[inventory](docs/DOCUMENT_INVENTORY.md) and
+[field/source matrix](docs/DECLARATION_FIELD_SOURCE_MATRIX.md). Policy OP-AN-DECL v1
+is an Owner operational policy, not an unverified legal rule. No production code,
+canonical model, classifier, codec, database or API is changed in this docs task.
+
+Proposed separation of responsibilities:
+
+| Layer | Responsibility | Approval/implementation boundary |
+|---|---|---|
+| Intake / classification | Preserve raw documents and dimensional identity: family, exact kind, mode, master/house hierarchy, checking context; retain uncertain classification | TASK-008 B/L–AWB boundary; later TASK-016 AN; classifier extension requires separate Leader approval |
+| Per-document extraction | Extract only source-grounded values and issues; keep units, weight kind and physical scope | TASK-008 existing contract; proposed ArrivalNotice is separate in TASK-016 |
+| Declaration intake | Capture structured/manual values plus actor, input version and field identity; never synthesize declaration from winning source | TASK-017, structured/manual before PDF/OCR |
+| Normalization | Explicit versioned catalogs, units/currency/date transformations; preserve source | TASK-009; proposed mapping/derivation evidence required |
+| Document relationship | Prove shipment, master/house, split/consolidated and active-revision scope before value comparison | TASK-010; no same-number or upload-order shortcut |
+| Rule engine | Versioned rule execution with applicability, coverage and exceptions | TASK-011 foundation; no source priority decided by AI confidence |
+| Checks | Two lanes: A document ↔ document, B required source ↔ declaration | TASK-012; preserve discrepancy even when declaration follows required source |
+| Report / correction | Separate A declaration compliance, B reconciliation, C readiness; immutable historical reports and invalidation/recheck | TASK-013/014/015; no automatic declaration mutation/transmission |
+
+The proposed source resolver runs only after identity/scope/active/unit gates. It
+uses the field registry and OP rule ID/version, returns required source/value plus
+reason/evidence or an unresolved BLOCK, and preserves all losing/differing candidates.
+AIR actual pieces/gross require AN without requiring a separate weigh ticket. SEA
+loading-place indicator requires AN with exact field/catalog mapping. SEA totals
+conflict has no automatic winning source; B/L totals require agreement with AN.
+Never substitute chargeable/net for gross, infer measurement evidence, average values,
+fallback to Bill when mandatory AN is unusable, or turn ETA into actual arrival.
+
+# 70. PROPOSED CONTRACTS AND VERSION BOUNDARIES
+
+The implemented contract is [DATA_SCHEMA Sections 1–8](docs/DATA_SCHEMA.md).
+Proposed extensions are isolated in its Section 9. `ArrivalNotice` is a new separate
+document contract proposal, not another interpretation of TransportDocument and not
+an alias in transport configuration. It needs explicit revision/source links,
+shipment/hierarchy/scope, units and weight kind, AN places with field semantics,
+planned vs actual event types, operational parties and containers. No weighing time,
+measurement ID or certificate may be fabricated to complete missing evidence.
+
+Existing CanonicalField stores raw/normalized values, origin and physical provenance;
+Evidence can reference extraction ID. Proposed decision evidence must join exact
+document + extraction + field + page or sheet/cell (bbox where available), plus
+source bytes/revision, mapping/policy versions and correction references. Do not claim
+these full decision/revision structures already exist. Calculated results need a
+separately approved derivation contract (inputs/formula/conversion/rounding/version),
+with a non-EXTRACTED origin; no new origin enum is silently introduced by this design.
+
+Three independent version domains:
+
+| Domain | Current / plan | Required treatment |
+|---|---|---|
+| Canonical schema | Implemented `CanonicalShipment.schema_version="0.1"` | New AN/registry/decision structures need reviewed schema/compatibility design; do not assign a new version in this amendment |
+| Extraction envelope | Implemented `(1, invoice)`, `(1, invoice_items)`, `(2, packing_list)`; planned `(3, transport_document)` in TASK-008D | Keep exact pairs and old payloads; **no AN envelope version reserved**; decide AN discrimination after compatibility review |
+| Database schema/migration | Existing SQLite tables/DDL from accepted ADRs | Independent migration decision; `schema_version="0.1"` is not the database version; no DDL/migration in this task |
+
+Reuse repository transaction/history engine where approved. Active extraction means
+current stored attempt, not verified active business document or approved source.
+Document revision selection needs evidence and authorized actor; newer upload/time/hash
+alone is insufficient. Preserve all raw/extracted values, superseded history, manual
+corrections, source decisions and exceptions. Persistence for new structures requires
+separate technical approval; append-only history, single-active, CAS/rollback and
+failed replacement behavior of ADR-001/003 must remain compatible.
+
+# 71. REGISTRY, COVERAGE, EXCEPTIONS AND READINESS
+
+The proposed declaration field registry in the matrix must hold ID/name/definition,
+mode/context applicability, required source and forbidden overrides, comparison,
+aggregation/conversion/tolerance, evidence, severity/blocking/exception behavior and
+support/coverage status. Registry IDs are internal design identifiers, not asserted
+official customs field codes. Unknown critical field semantics or catalog is BLOCK.
+
+Check-result status and dossier readiness are separate. BLOCK is a proposed workflow
+disposition; it is not a new implemented enum or a synonym for extraction failure.
+Critical applicable fields lacking implementation, inputs or an executed current check
+are NOT_CHECKED + BLOCK. Explicit supported evidence is needed for N/A applicability;
+unknown applicability cannot increase readiness. A PASS in lane B never erases an
+OPEN lane A conflict. High-risk unresolved conflicts block until resolved or accepted
+under a named, authorized exception allowed by the policy. Exceptions retain finding,
+fields/docs, differing values, reason/evidence, acceptor, time and policy version; they
+cannot waive required AN, permit the wrong required value or bypass shipment identity.
+
+Source, extraction, active revision, correction, declaration, context, mapping, rule
+or policy changes invalidate affected current decisions/checks/readiness and require
+recheck. Evaluate whether each exception still covers the new evidence; old exceptions
+cannot silently authorize new values. Historical report remains inspectable but stale.
+Freight/insurance calculations trace charge vs insured-value semantics and included
+costs to prevent double counting; HS remains the declarant's decision, with description
+reconciliation and no automatic historical copying or legal correctness claim.
+
+# 72. KNOWN GAPS AND RELEASE GATES
+
+Current classification has broad B/L/AWB categories and keyword clues, without a
+separate AN/Sea Waybill/manifest kind or independent mode/hierarchy/context. An AN
+containing an AWB number can therefore not be authorized merely by enum + confidence.
+TASK-008D needs exact-kind content exclusion/authorization evidence and a separately
+Leader-approved classifier dependency if the existing classifier cannot enforce it.
+Do not silently add enum values, aliases, new schemas or broader input authorization
+in TASK-008A. Negative designs cover AN with AWB number, Sea Waybill, standalone
+manifest and unsupported kinds. A manifest-like table *inside an accepted B/L/AWB*
+is a layout only. ROAD/RAIL/MULTIMODAL remain inventory/extension design, not TASK-008
+extractor inputs. PDF geometry absence must not lead to fabricated bounding boxes.
+
+TASK-016 contracts/compatibility → classification/extraction → service/persistence →
+integration/regression precedes TASK-017 intake and TASK-009 onward (Section 61).
+TASK-009–015 keep their IDs and purposes. Each technical schema/classifier/persistence
+change needs its task's explicit Leader authorization after dependencies close.
+Docs amendment must be independently reviewed, approved, merged and closed before
+TASK-008A can start. All TASK-008 children and new planned tasks remain TODO.
 
 # END OF ARCHITECTURE
 

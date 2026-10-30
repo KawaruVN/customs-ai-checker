@@ -3,6 +3,11 @@
 Version: 0.1  
 Status: Active
 
+Sections 1–8 describe the implemented canonical contract in
+`src/customs_ai/domain/schema.py`. Section 9 is a **proposed extension design** for
+the 2026-10-30 docs amendment, pending review and separate implementation approval.
+The implemented schema remains 0.1; this document does not add runtime fields.
+
 ## 1. Core Principles
 
 The V1 Canonical Schema normalizes diverse customer document formats into standard semantic structures.
@@ -139,6 +144,10 @@ Business numeric fields use `CanonicalField[Decimal]`.
 
 Represents Bill of Lading, Sea Waybill, and Air Waybill use cases using optional fields where a field does not apply.
 
+Model representability does not authorize extraction of every kind. TASK-008 accepts
+only B/L and AWB; Sea Waybill is not a supported classification and must not be
+silently mapped to B/L. Arrival Notice will require a separate proposed contract.
+
 Fields:
 
 - `document_number`
@@ -224,3 +233,102 @@ Unknown customer/layout-specific fields must therefore be rejected instead of si
 The canonical models support Pydantic validation, JSON serialization, JSON re-validation, and JSON Schema generation through `CanonicalShipment.model_json_schema()`.
 
 Raw and normalized data must remain distinguishable after serialization, and the `origin` must remain explicit.
+
+## 9. Proposed Arrival / Declaration Extensions — NOT IMPLEMENTED
+
+Authority: Owner operational policy OP-AN-DECL v1 in
+[MASTER_SPEC Section 61](../MASTER_SPEC.md), proposed technical decision
+[ADR-004](decisions/ADR-004-arrival-declaration-source-policy.md),
+[inventory](DOCUMENT_INVENTORY.md) and [field registry](DECLARATION_FIELD_SOURCE_MATRIX.md).
+Business priorities are Owner-approved; field layouts, validators, version assignment,
+migrations and public contracts below require separate Leader approval in
+[TASK-016](../tasks/todo/TASK-016-arrival-notice-evidence.md) and
+[TASK-017](../tasks/todo/TASK-017-declaration-intake.md). No schema.py change here.
+
+### 9.1 Document identity dimensions and source lifecycle
+
+Propose independent family (transport/arrival/commercial/declaration), exact kind
+(B/L, AWB, AN, Sea Waybill, manifest, etc.), mode (SEA/AIR/ROAD/RAIL/MULTIMODAL),
+hierarchy (master/house/unknown) and checking context (shipment/declaration type,
+goods, direction and applicable operational policy). Unknown is explicit. A token
+“AWB” inside an AN is a reference, not proof of AWB kind. Existing DocumentType and
+ClassificationResult do not implement these dimensions; no enum expansion is implied.
+
+Source-document revision and active-business-document selection need revision
+identifier/date where present, supersession evidence, actor/time/reason and unresolved
+state. Upload order is not revision order. A persistence active extraction is not
+proof of business-document authority. Master/house/split/consolidation relationships
+must be grounded before scopes can be compared or summed.
+
+### 9.2 Separate proposed ArrivalNotice
+
+The contract must preserve independently grounded AN reference; Bill/AWB references
+with master/house scope; operational parties (including AN notify, separate from Bill
+notify and importer/buyer); mode; arrival/loading/discharge/storage places with their
+own field definitions/catalog references; flight or vessel/voyage; estimated and actual
+arrival events as distinct facts; containers; actual pieces/package kind; gross/net/
+chargeable weights with explicit units and shipment scope; and provenance/issues.
+ArrivalNotice is not embedded into TransportDocument and is not a transport alias.
+AN may lack any field; missing stays None/review, never copied from Bill to create AN.
+
+Weight/unit/scope wrappers and aggregate linkage are proposals, not fields already
+accepted by CanonicalField or CanonicalShipment. Gross/net/chargeable are never
+interchangeable. No invented weigh ticket, weighing time or measurement ID; real
+measurement evidence may be attached when it exists but is not an AIR AN prerequisite.
+AN place names require exact declaration-field and catalog mapping; current
+TransportDocument.port_of_loading is not a declaration location code carrier.
+
+### 9.3 Declaration intake and registry
+
+Current CustomsDeclaration is a skeleton representing only the fields in Section 5.
+It has no intake service, operational loading-place/arrival fields or coverage gate.
+Propose structured/manual intake first with field ID/definition, input version,
+actor/time, supplied values and applicability context. Manual values retain MANUAL
+origin and honest input evidence; do not fabricate document/page/cell for manual input.
+Preserve identifiers/leading zeroes and exact supplied Decimal/date representations.
+PDF/OCR declaration extraction is separately authorized later.
+
+Proposed field registry contains ID/name/definition, mode/context applicability,
+required source, forbidden overrides, comparison/aggregation/conversion/tolerance,
+required evidence, severity/blocking/exception behavior and coverage/support status.
+Internal registry IDs in the matrix are not official customs indicator codes. Map to
+official field identifiers only after exact definitions/catalogs are approved.
+
+### 9.4 Evidence, decisions, calculations, exceptions and snapshots
+
+Existing CanonicalField provides document/page/sheet/cell/bbox and exact raw value;
+existing Evidence can additionally reference extraction_id. Proposed decision evidence
+joins document + extraction + canonical/registry field path + physical location where
+applicable, source hash/revision/scope, normalization/catalog version and corrections.
+All differing values stay inspectable. Source decision records need rule ID/version,
+required source/value, eligibility/rejection reasons and evidence. SEA totals conflict
+has unresolved decision + BLOCK, never an invented winning source.
+
+Derived/calculated values must retain input evidence IDs, formula, unit/currency/
+catalog conversion, rounding/tolerance and version. They must not have EXTRACTED
+origin. A new derived origin or separate derivation model is a future approval choice;
+the current enum remains EXTRACTED/INFERRED/MANUAL. Insurance insured value and premium
+require different semantics; included freight/insurance costs cannot be counted twice.
+
+Exception records must reference finding, fields/docs, all differing values, reason,
+evidence, authorized acceptor, time and OP policy version. They may accept a permitted
+discrepancy but cannot waive required AN, wrong required value or unidentified shipment.
+Proposed check snapshot records exact declaration input, active document/extraction,
+correction, context, catalog/rule/policy versions and coverage. Separate declaration
+compliance, document reconciliation and readiness. BLOCK is proposed readiness,
+NOT_CHECKED an unexecuted check; no runtime enum/schema change in this amendment.
+Changed dependencies invalidate current checks/readiness; preserve historical results
+and re-evaluate exceptions before recheck may support a current outcome.
+
+### 9.5 Compatibility and independent version domains
+
+| Domain | Implemented / planned state | Amendment boundary |
+|---|---|---|
+| Canonical schema | `CanonicalShipment.schema_version = "0.1"` implemented | AN/registry/decision additions need separate compatibility and version decision; none assigned here |
+| Extraction envelope `format_version` + kind | Invoice `(1, invoice)`, `(1, invoice_items)` and Packing `(2, packing_list)` implemented; Transport `(3, transport_document)` planned in TASK-008D | Preserve exact pairs and legacy rows; no new AN envelope version reserved |
+| Database schema/migration | Accepted SQLite repository DDL/history semantics (ADRs 001/003) | Independent migration/version control; 0.1 is not a SQLite database version; no DDL changes here |
+
+No proposed contract is silently serialized into old envelopes or undeclared fields.
+Future persistence must retain strict validation, Decimal/date/Unicode/provenance,
+source/hash/CAS, single-active, failed-attempt history and rollback invariants. Schema,
+classifier and persistence changes need separately reviewed task scopes before code.

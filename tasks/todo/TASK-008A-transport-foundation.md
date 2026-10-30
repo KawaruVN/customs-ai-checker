@@ -6,8 +6,8 @@ Parent: TASK-008
 Developer: Codex — Main Developer  
 Reviewer: Antigravity — Independent Technical Reviewer / QA  
 Final Approver: ChatGPT — Project Leader / Architect  
-Dependencies: TASK-007 DONE  
-Pre-task baseline: 1422 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1)
+Dependencies: TASK-007 DONE; documentation amendment independent review, merge and closure; separate implementation authorization<br>
+Reported pre-task baseline: 1422 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1); not rerun by the docs-only amendment
 
 ---
 
@@ -23,6 +23,8 @@ Establish the foundational configuration, multilingual alias dictionaries (EN, V
 - `TransportDocument`, `CanonicalField`, `Party`, and `ValueOrigin` in `src/customs_ai/domain/schema.py` remain the authoritative canonical source of truth.
 - Preserve existing Commercial Invoice and Packing List configurations, models, and test baselines.
 - Reuse established primitives: `normalize_alias`, `parse_decimal`, `parse_date`, `ExtractionStatus`, `ExtractionIssue`, `ExtractionCandidate`.
+- Read [ADR-004](../../docs/decisions/ADR-004-arrival-declaration-source-policy.md), [document inventory](../../docs/DOCUMENT_INVENTORY.md) and [source matrix](../../docs/DECLARATION_FIELD_SOURCE_MATRIX.md) for source-authority and future coverage boundaries. Approved Owner policy does not expand this foundation's paths or imply that a transport extraction result is shipment PASS.
+- **Start gate**: status remains TODO. The current docs-only amendment must complete independent review → Project Leader assessment → Owner commit/push → Leader remote verification → Owner merge → closure before separately authorized TASK-008A development begins.
 
 ---
 
@@ -40,6 +42,7 @@ Establish the foundational configuration, multilingual alias dictionaries (EN, V
      - Commercial terms: `freight_term` (Prepaid, Collect)
    - Logistics reference list paths (2 paths):
      - `container_numbers`, `seal_numbers`
+   - These are exact approved sets: no additional AN fields/aliases, no omitted party `tax_id`, and no relaxed exact-path validator. General Waybill labels apply only within authorized AWB/B/L context and never authorize Sea Waybill/AN/standalone manifest input.
    - Non-header boundary labels (`_NON_HEADER_LABELS`) to prevent party/logistics cross-contamination.
 
 2. **Configuration Loader & Validator (`src/customs_ai/extraction/transport_config.py`)**:
@@ -66,6 +69,7 @@ Establish the foundational configuration, multilingual alias dictionaries (EN, V
 
 2. **Sea Waybill Classification Gap**:
    - `SEA_WAYBILL` is not present in `DocumentType`. Do NOT add `SEA_WAYBILL` to the enum or silently alias it to `BILL_OF_LADING`. Document this boundary explicitly.
+   - Existing keyword-based classification can confuse unsupported documents containing Bill/AWB references. The exact-kind gate and any necessary separately approved classifier change are dependencies for TASK-008D/E, not classification implementation in TASK-008A.
 
 3. **Party Role Separation**:
    - `shipper`, `consignee`, and `notify_party` represent distinct transport roles and must never be conflated with commercial `seller`/`buyer` or customs `importer`/`exporter`.
@@ -83,6 +87,7 @@ Establish the foundational configuration, multilingual alias dictionaries (EN, V
 - Document parsing or extractor implementations (deferred to TASK-008B and TASK-008C).
 - Persistence integration or database operations (deferred to TASK-008D).
 - Classification engine alterations or new classification rules.
+- AN extraction, AN aliases/contracts, standalone manifest or road/rail/multimodal extraction; required-source policy execution and declaration intake (planned in [TASK-016](TASK-016-arrival-notice-evidence.md), [TASK-017](TASK-017-declaration-intake.md) and downstream checking tasks).
 - Cross-document validation, matching, or normalization.
 - UI, CLI endpoints, or REST API controllers.
 
@@ -96,11 +101,14 @@ Establish the foundational configuration, multilingual alias dictionaries (EN, V
 - [ ] AC-04: `transport_models.py` defines strict result contracts reusing canonical types, `ExtractionStatus`, `ExtractionIssue`, and `ExtractionCandidate`.
 - [ ] AC-05: Unit tests pass 100% and pre-existing 1422 tests remain fully green.
 - [ ] AC-06: Zero changes to production parsing, classification, or persistence code.
+- [ ] AC-07: Exact 24-header/2-list path-set tests retain the three party tax IDs, reject extra/missing paths and prevent AN aliases from entering this configuration; no source-authority/business PASS is inferred from a valid extraction contract.
 
 ---
 
 ## 7. REVIEW & APPROVAL GATES
 
+- **Before Development**: documentation amendment independent review → Leader assessment → Owner commit/push → Leader remote verification → Owner merge → closure; Project Leader separately authorizes TASK-008A.
 - **Developer Handoff**: Codex must present implementation diff, test evidence, and self-review.
 - **Independent Technical Review**: Antigravity reviews code, contract compliance, and executes adversarial probes.
 - **Project Leader Approval**: ChatGPT approves for Pull Request creation and merge.
+- TASK-008B begins only after this child is approved and merged, with separate authorization. This docs amendment does not mark any implementation criterion complete.

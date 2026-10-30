@@ -2,6 +2,10 @@
 
 # Customs AI Checker — Master Specification
 
+Amendment 2026-10-30: Owner requirements for pre-transmission declaration checking
+are recorded in Section 61. Technical design in this docs amendment is pending
+independent review, Leader approval, merge and closure; it is not runtime functionality.
+
 Version: 0.1  
 Status: Draft  
 Project: Customs AI Checker
@@ -1316,13 +1320,14 @@ J. Human correction
 1. Commercial Invoice
 2. Packing List
 3. Bill of Lading / AWB
-4. Customs Declaration / declaration data
+4. Arrival Notice (SEA/AIR, required under the Owner workflow in Section 61)
+5. Customs Declaration / declaration data (structured/manual intake first)
 
 Sau khi ổn định:
 
-5. Contract / PO
-6. C/O
-7. Catalogue / Specification
+6. Contract / PO
+7. C/O (conditional on the goods/dossier)
+8. Catalogue / Specification
 
 ---
 
@@ -1381,6 +1386,8 @@ Không triển khai toàn bộ pháp luật hải quan ngay trong V1.
 - Invoice
 - Packing List
 - Bill/AWB
+- Arrival Notice SEA/AIR and operational evidence, after TASK-008 closure
+- Structured/manual declaration intake, before normalization and checks
 
 ## Phase 5 — Normalization
 
@@ -1425,6 +1432,8 @@ Không triển khai toàn bộ pháp luật hải quan ngay trong V1.
 # 57. ACCEPTANCE TARGET — V1
 
 V1 phải đạt được luồng:
+
+Illustrative extraction subset (not a sufficient dossier or readiness PASS):
 
 Upload:
 
@@ -1482,7 +1491,9 @@ User can inspect evidence.
 
 User:
 
-Upload 3 files.
+Upload the applicable dossier, including required Arrival Notice and declaration
+data for this workflow. The following three-document count is only a UI illustration;
+it cannot authorize readiness when required documents or critical checks are missing.
 
 Select:
 
@@ -1584,5 +1595,106 @@ correctness
 → advanced AI features.
 
 ---
+
+# 61. OWNER OPERATIONAL POLICY — ARRIVAL AND DECLARATION
+
+Product priority is reducing errors that cause declaration correction/cancellation
+before transmission. Both **document ↔ document** and **required source ↔ declaration**
+checks are required. Extraction completion, active extraction and a high confidence
+score do not constitute business PASS or permission to proceed.
+
+The Owner-approved requirements below are policy **OP-AN-DECL, version 1,
+2026-10-30** (`INTERNAL_POLICY`), not universal legal conclusions. Rule IDs,
+proposed technical contracts and design walkthroughs are in
+[ADR-004](docs/decisions/ADR-004-arrival-declaration-source-policy.md).
+[Document inventory](docs/DOCUMENT_INVENTORY.md) and the
+[declaration field/source/coverage matrix](docs/DECLARATION_FIELD_SOURCE_MATRIX.md)
+define applicability and required evidence. Technical implementation requires its
+own task approvals; this amendment changes documents only.
+
+## 61.1 Required sources and preserved conflicts
+
+- **AIR:** Arrival Notice is required for actual pieces and gross weight. AWB
+  disagreement cannot override AN. A separate weigh ticket is not a prerequisite
+  to this source priority. Do not invent weighing evidence, time or measurement ID.
+  AWB still supplies shipment identity, bill number, transport parties, routing
+  and freight terms. Preserve its differing values as findings.
+- **SEA:** AN is mandatory for the declaration indicator **“địa điểm xếp hàng”**
+  in this workflow. Declaration follows AN when B/L differs. An AN place name must
+  map through the correct versioned catalog and exact declaration-field definition
+  before producing a code. Port of Loading, Place of Receipt, storage location and
+  customs location codes are separate concepts; no automatic equivalence.
+  Reconcile vessel/voyage, arrival/ETA and containers against AN. ETA is not actual
+  arrival. B/L packages/weight are eligible only when they agree with AN; disagreement
+  is conflict + BLOCK with **no automatic winning source** for SEA totals.
+- Missing mandatory AN, wrong shipment, unresolved master/house scope, unclear active
+  revision, wrong weight kind or missing necessary unit means BLOCK; no Bill fallback.
+  Gross, net and chargeable weight are distinct. Do not average conflicting sources,
+  choose Bill by default, or let confidence override source policy.
+- Seller, shipper, buyer, importer, consignee and AN notify are role-specific. Do not
+  equate roles. Legitimate differences require an explicit named exception with evidence.
+
+## 61.2 Three separate outcomes
+
+Record (A) declaration compliance with required source/value, (B) document
+reconciliation, and (C) dossier readiness separately. With AWB 108 kg / AN 113 kg,
+declaration 108 kg is BLOCK; declaration 113 kg may PASS comparison A, while the AWB
+discrepancy stays OPEN in B. C remains BLOCK until it is resolved or an authorized
+policy-compliant exception is accepted. Exception acceptance does not erase findings.
+
+Accepted exceptions must retain finding IDs, fields/documents, all differing values,
+reason, evidence, authorized acceptor identity, time and policy version. They cannot
+permit a wrong required AN value, waive mandatory AN or bypass shipment identification.
+Unresolved high-risk conflicts BLOCK: SEA loading place; AIR pieces/gross; actual
+shipment Bill number; importer/consignee identity and its relationship to buyer/AN
+notify; invoice number/date/currency/Incoterms/value; arrival and flight or vessel/voyage
+against AN. A critical unsupported/unexecuted field is **NOT_CHECKED + BLOCK**, never
+shipment PASS. BLOCK is readiness disposition, distinct from per-check result status.
+
+## 61.3 Traceable decisions, adjustments and recheck
+
+Keep every source value, exact provenance (document/extraction/field/page/cell),
+corrections and evidence-based revision/active selection. Newer upload is not proof
+of newer document revision. Record required source/value, winning-source reason and
+rule ID/version; SEA totals conflict has an explicit unresolved decision, not a winner.
+Calculated values trace all inputs, formula, conversion/catalog versions and rounding;
+they are never marked EXTRACTED. Never automatically edit or transmit declaration data.
+
+Conflict reports must show declaration value, each document value, required value and
+source, reason, discrepancy, blocking status, exception and next action. A change to
+source/active revision/extraction/correction, declaration, context, mapping or policy
+invalidates affected checks and exceptions whose evidence/authority no longer applies;
+recheck before current readiness can be asserted. Old reports remain historical.
+
+C/O, permits and specialized documents are conditional on explicit dossier/goods
+applicability. Unknown critical applicability is review + BLOCK, not silently N/A.
+Insured value and insurance premium are different fields. Never add insured value as
+insurance charge. Freight/insurance adjustments must account for costs already
+included in invoice price; no double counting. Missing inclusion/currency evidence
+blocks the affected valuation check. Declarant decides HS; do not copy historical HS
+automatically. Reconcile classification descriptions across documents; this does not
+certify legal HS correctness.
+
+# 62. EXECUTION ROADMAP AFTER THIS AMENDMENT
+
+1. Docs amendment: Antigravity read-only review → Leader decision → Owner commit/push
+   → Leader remote verification → Owner merge → closure.
+2. TASK-008A → B → C → D → E, B/L–AWB only, one child reviewed/approved/merged at a time.
+3. [TASK-016](tasks/todo/TASK-016-arrival-notice-evidence.md), Arrival Notice SEA/AIR
+   and operational evidence: contracts/compatibility → classification/extraction →
+   service/persistence → integration/regression.
+4. [TASK-017](tasks/todo/TASK-017-declaration-intake.md), structured/manual Declaration
+   Intake first; PDF/OCR requires later separate authorization.
+5. TASK-009 Normalization.
+6. TASK-010 Document Relationship + Item Matching.
+7. TASK-011 Rule Engine Foundation.
+8. TASK-012: lane A document ↔ document; lane B required source ↔ declaration,
+   required-source policy and coverage gating.
+9. TASK-013 Report Generation; TASK-014 Human Correction/recheck; TASK-015 Golden Dataset
+   Regression. These existing IDs retain their purpose; 016/017 are prerequisites in
+   execution order, not renumberings of 009–015.
+
+ROAD/RAIL/MULTIMODAL are inventory and extension design only, with no extractor
+authorized in TASK-008. No future task is started or marked complete by this amendment.
 
 # END OF MASTER SPECIFICATION

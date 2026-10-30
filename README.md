@@ -56,6 +56,7 @@ V1 tập trung vào:
 - Commercial Invoice
 - Packing List
 - Bill of Lading / AWB
+- Arrival Notice SEA/AIR (the required-source workflow is planned; extraction not implemented)
 - Customs Declaration / declaration data
 
 ---
@@ -194,9 +195,27 @@ Không commit:
 
 Current phase: `TASK-008 — Transport Document Extraction` (Phase: `V1 — Document Understanding`)
 
-Current task: `TASK-008A — Transport Foundation & Contracts` (TODO — Khởi tạo nền tảng trích xuất B/L & AWB, aliases đa ngữ EN/VI/ZH, typed contracts; Parent Epic: TASK-008)
+Current work: `Docs amendment — Arrival / Declaration source policy` (developer documentation handoff; pending Antigravity READ-ONLY review, Leader approval, Owner merge and closure).
 
-Authoritative baseline: 1422 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1).
+Next task: `TASK-008A — Transport Foundation & Contracts` (TODO; starts only after amendment review/merge/closure and explicit Leader authorization; B/L–AWB only, exactly 24 header + 2 reference-list paths).
+
+Reported baseline from TASK-007 closure: 1422 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1). Pytest NOT RUN for this docs-only amendment; these numbers were not reverified in this run.
+
+Planned execution order: docs amendment closure → TASK-008A..E sequentially →
+[TASK-016 Arrival Notice & Operational Evidence](tasks/todo/TASK-016-arrival-notice-evidence.md)
+(contracts → classification/extraction → service/persistence → integration/regression) →
+[TASK-017 Declaration Intake](tasks/todo/TASK-017-declaration-intake.md) (structured/manual first) →
+TASK-009 Normalization → TASK-010 Document Relationship + Item Matching → TASK-011 Rule Engine
+Foundation → TASK-012 A document ↔ document / B required source ↔ declaration + coverage →
+TASK-013 Report → TASK-014 correction/recheck → TASK-015 golden regression. Existing 009–015
+IDs keep their purpose. ROAD/RAIL/MULTIMODAL are inventory/extension design only.
+
+Policy and proposed technical scope:
+[ADR-004](docs/decisions/ADR-004-arrival-declaration-source-policy.md),
+[document inventory](docs/DOCUMENT_INVENTORY.md),
+[field/source/coverage matrix](docs/DECLARATION_FIELD_SOURCE_MATRIX.md).
+Owner source requirements are recorded; proposed AN/declaration contracts and checks
+remain unimplemented. Extraction success does not mean dossier PASS.
 
 > [!NOTE]
 > **Phạm vi hoàn thành V1 của TASK-007:**
@@ -205,7 +224,7 @@ Authoritative baseline: 1422 passed, 0 failed, 0 skipped, 2 warnings (Python 3.1
 Recently completed:
 - `TASK-007 — Packing List Extraction (EPIC)` (DONE — Hoàn thành toàn diện Epic qua PR #7–#11, merge commit cuối `6d60351`)
   - Hoàn thành đầy đủ 5 nhiệm vụ thành phần: TASK-007A (Foundation/Contracts), TASK-007B (Deterministic Headers), TASK-007C (Deterministic Excel Items), TASK-007D (Service & Persistence Envelope v2), TASK-007E (Integration & Regression).
-  - Đảm bảo 100% tính tương thích ngược với luồng trích xuất Commercial Invoice v1; bảo vệ tính bất biến của source file và lưu trữ an toàn với SQLite schema v0.1.
+  - Đảm bảo 100% tính tương thích ngược với luồng trích xuất Commercial Invoice envelope v1; bảo vệ tính bất biến của source file và lưu trữ an toàn với SQLite; canonical schema vẫn là 0.1 (khác với phiên bản database và envelope).
   - Bộ kiểm thử toàn hệ thống: 1422 passed, 2 warnings; 49/50 independent adversarial QA probes passed (1 variant NOT RUN do giới hạn quyền Windows symlink, thay thế bằng NTFS junction PASS).
 - `TASK-007E — Packing List Integration & Regression` (DONE — Merged via PR #11, commit `6d60351`)
   - Tích hợp toàn diện pipeline trích xuất Packing List production từ byte upload qua `IngestionService`, phân loại `build_classification_service`, phân giải trực quan, bóc tách deterministic headers/items, lưu trữ qua codec envelope v2 vào SQLite, đến truy xuất lại từ `DocumentExtractionRepository`.
@@ -222,7 +241,7 @@ Recently completed:
   - Cổng phân loại kép (classification gate): chỉ xử lý tài liệu được phân loại an toàn là `PACKING_LIST` với confidence >= 0.50; từ chối dứt khoát tài liệu sai nội dung (Invoice mang tên Packing List) mà không ghi nhận attempt hay làm thay đổi metadata.
   - Phân tầng an toàn trực quan PDF: PDF native sạch bỏ qua hoàn toàn OCR; tài liệu ảnh/scan yêu cầu kiểm tra toàn diện chất lượng và phân giải; tuân thủ chính sách V1 chưa hỗ trợ bảng hàng hóa trong PDF (`PDF_PACKING_ITEMS_UNSUPPORTED`, `items=[]`, `NEEDS_REVIEW`), tuyệt đối không bịa đặt số liệu.
   - Tách biệt ngữ cảnh dòng hàng trong Excel: cách ly các dòng hàng hóa hợp lệ để nhãn cột trọng lượng trong bảng không bị nhận diện nhầm thành header chứng từ; bảo toàn đầy đủ provenance (sheet, cell, bounding box) và prefix `header.`/`items.` cho candidates.
-  - Mở rộng persistence codec có phân biệt (discriminated persistence envelope v2): hỗ trợ đồng thời v1 Invoice (`(1, invoice)`, `(1, invoice_items)`) và v2 Packing List (`(2, packing_list)`) mà không thay đổi DDL/schema SQLite (`schema_version = "0.1"` giữ nguyên).
+  - Mở rộng persistence codec có phân biệt (discriminated persistence envelope v2): hỗ trợ đồng thời v1 Invoice (`(1, invoice)`, `(1, invoice_items)`) và v2 Packing List (`(2, packing_list)`) mà không thay đổi DDL/schema SQLite; canonical `schema_version = "0.1"` giữ nguyên, không phải database version.
   - Bảo toàn toàn vẹn kiểu dữ liệu và độ chính xác: Decimal scale (`0.00`, 20 chữ số nguyên), ngày tháng (`datetime.date`), danh sách đa tham chiếu hóa đơn, và văn bản Unicode đa ngữ (Tiếng Việt, Tiếng Trung) qua round-trip SQLite thực tế; xác thực snapshot wire JSON khắt khe ngăn chặn ép kiểu ngầm.
   - Chu trình giao dịch SQLite an toàn: cơ chế khóa ghi `BEGIN IMMEDIATE`; đảm bảo duy nhất 1 bản ghi active qua partial index; lịch sử attempt đơn điệu tăng dần; bảo vệ tối thượng cho bản ghi active khi gặp attempt `FAILED` (không deactive dữ liệu hợp lệ trước đó); rollback toàn diện khi trigger/commit thất bại.
   - Bộ kiểm thử: 149 test cases mới (74 service, 75 persistence), 1327 tests full-suite passed, 2 warnings (Python 3.13.14, pytest 9.1.1); 50/50 independent adversarial probes passed.
