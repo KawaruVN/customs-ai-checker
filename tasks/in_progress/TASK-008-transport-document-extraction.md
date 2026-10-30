@@ -7,7 +7,7 @@ Developer: Codex — Main Developer
 Reviewer: Antigravity — Independent Technical Reviewer / QA  
 Owner / Final Approver: Project Leader (ChatGPT)  
 Created: 2026-10-29  
-Dependencies: TASK-007 DONE; documentation amendment independently reviewed, merged and closed before TASK-008A<br>
+Dependencies: TASK-007 DONE; documentation amendment closed (commit c8032cc); separate implementation authorization required for TASK-008A<br>
 Children: TASK-008A..TASK-008E (ALL TODO)  
 Reported Baseline: 1422 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1); not rerun by the docs-only amendment
 
@@ -158,4 +158,4 @@ After TASK-008A..E close sequentially, the planned order is TASK-016 AN/evidence
 
 ## 7. DOCS AMENDMENT STATE
 
-Epic status remains IN_PROGRESS; all five children remain TODO. This amendment changes documentation only and does not satisfy implementation acceptance criteria. The 1422-test figure is a reported pre-task baseline, not a test run performed by this amendment. Design walkthroughs of ADR-004 are not runtime test PASS evidence.
+Docs amendment is CLOSED (committed directly to `main` by Owner without PR, commit `c8032cc507a658e76fd7dc481ac683f8e61c428d`). Epic status remains IN_PROGRESS; all five children remain TODO. TASK-008A is the next authorized scope upon separate implementation start by Codex. The 1422-test figure is a reported pre-task baseline, not a test run performed by this amendment. Design walkthroughs of ADR-004 are not runtime test PASS evidence.

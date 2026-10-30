@@ -6,7 +6,7 @@ Parent: TASK-008
 Developer: Codex — Main Developer  
 Reviewer: Antigravity — Independent Technical Reviewer / QA  
 Final Approver: ChatGPT — Project Leader / Architect  
-Dependencies: TASK-007 DONE; documentation amendment independent review, merge and closure; separate implementation authorization<br>
+Dependencies: TASK-007 DONE; documentation amendment closed (commit c8032cc); separate implementation authorization required<br>
 Reported pre-task baseline: 1422 passed / 0 failed / 0 skipped / 2 warnings (Python 3.13.14, pytest 9.1.1); not rerun by the docs-only amendment
 
 ---
@@ -24,7 +24,7 @@ Establish the foundational configuration, multilingual alias dictionaries (EN, V
 - Preserve existing Commercial Invoice and Packing List configurations, models, and test baselines.
 - Reuse established primitives: `normalize_alias`, `parse_decimal`, `parse_date`, `ExtractionStatus`, `ExtractionIssue`, `ExtractionCandidate`.
 - Read [ADR-004](../../docs/decisions/ADR-004-arrival-declaration-source-policy.md), [document inventory](../../docs/DOCUMENT_INVENTORY.md) and [source matrix](../../docs/DECLARATION_FIELD_SOURCE_MATRIX.md) for source-authority and future coverage boundaries. Approved Owner policy does not expand this foundation's paths or imply that a transport extraction result is shipment PASS.
-- **Start gate**: status remains TODO. The current docs-only amendment must complete independent review → Project Leader assessment → Owner commit/push → Leader remote verification → Owner merge → closure before separately authorized TASK-008A development begins.
+- **Start gate**: status remains TODO until Codex actually begins development under separate Project Leader authorization (docs amendment closed via commit c8032cc).
 
 ---
 
@@ -107,7 +107,7 @@ Establish the foundational configuration, multilingual alias dictionaries (EN, V
 
 ## 7. REVIEW & APPROVAL GATES
 
-- **Before Development**: documentation amendment independent review → Leader assessment → Owner commit/push → Leader remote verification → Owner merge → closure; Project Leader separately authorizes TASK-008A.
+- **Before Development**: documentation amendment closed (commit c8032cc); Project Leader separately authorizes TASK-008A; status remains TODO until development begins.
 - **Developer Handoff**: Codex must present implementation diff, test evidence, and self-review.
 - **Independent Technical Review**: Antigravity reviews code, contract compliance, and executes adversarial probes.
 - **Project Leader Approval**: ChatGPT approves for Pull Request creation and merge.

@@ -195,9 +195,9 @@ Không commit:
 
 Current phase: `TASK-008 — Transport Document Extraction` (Phase: `V1 — Document Understanding`)
 
-Current work: `Docs amendment — Arrival / Declaration source policy` (developer documentation handoff; pending Antigravity READ-ONLY review, Leader approval, Owner merge and closure).
+Current work: `TASK-008 — Transport Document Extraction` (In progress; docs amendment closed via commit `c8032cc`).
 
-Next task: `TASK-008A — Transport Foundation & Contracts` (TODO; starts only after amendment review/merge/closure and explicit Leader authorization; B/L–AWB only, exactly 24 header + 2 reference-list paths).
+Next task: `TASK-008A — Transport Foundation & Contracts` (TODO — Công việc tiếp theo; vẫn ở trạng thái TODO cho đến khi Codex thực sự bắt đầu theo ủy quyền; B/L–AWB only, exactly 24 header + 2 reference-list paths; Parent Epic: TASK-008).
 
 Reported baseline from TASK-007 closure: 1422 passed, 0 failed, 0 skipped, 2 warnings (Python 3.13.14, pytest 9.1.1). Pytest NOT RUN for this docs-only amendment; these numbers were not reverified in this run.
 
@@ -222,6 +222,14 @@ remain unimplemented. Extraction success does not mean dossier PASS.
 > Trích xuất bảng hàng hóa từ PDF (`PDF_PACKING_ITEMS_UNSUPPORTED`), đối soát chéo chứng từ (cross-document matching), chuẩn hóa dữ liệu nâng cao (normalization), và các quy tắc nghiệp vụ hải quan/thuế (customs/HS/VAT rules) nằm ngoài phạm vi hoàn thành của Epic TASK-007 và được hoãn lại cho các giai đoạn tiếp theo.
 
 Recently completed:
+- `Docs Amendment — Arrival Notice & Declaration Source Policy` (CLOSED — Committed directly to `main` by Owner without PR, commit `c8032cc`)
+  - Ghi nhận chính thức chính sách vận hành nguồn dữ liệu kiểm tra tờ khai hải quan `OP-AN-DECL v1` (Owner internal operational policy, 2026-10-30).
+  - Xác lập nguyên tắc bắt buộc: Hàng Air đối chiếu số kiện thực tế và trọng lượng cả bì theo Arrival Notice (AN), không bắt buộc phiếu cân riêng và không bịa đặt chứng cứ cân; Hàng Sea chỉ tiêu "địa điểm xếp hàng" bắt buộc theo AN qua danh mục chuẩn có phiên bản, tổng kiện/trọng lượng B/L chỉ dùng khi khớp AN (xung đột thì BLOCK, không có nguồn thắng mặc định).
+  - Tách bạch 3 kết quả độc lập: (A) Tuân thủ tờ khai, (B) Đối soát chứng từ, (C) Sẵn sàng hồ sơ (Readiness). Khớp AN ở Lane B vẫn giữ sai lệch AWB ở Lane A OPEN; Readiness C vẫn BLOCK trừ khi có ngoại lệ được chấp thuận theo thẩm quyền với đầy đủ chứng cứ.
+  - Phân định 3 miền phiên bản độc lập: Canonical schema (`0.1`), Extraction envelope format (v1 Invoice, v2 Packing, v3 Transport dự kiến; không gán envelope cho AN), và Database/DDL migration.
+  - Khởi tạo quy hoạch chi tiết: `ADR-004`, `DECLARATION_FIELD_SOURCE_MATRIX.md` (26 trường), `DOCUMENT_INVENTORY.md`, Epic `TASK-016` (016A..D: AN Foundation) và `TASK-017` (Declaration Intake structured/manual). Giữ nguyên vẹn các ID `TASK-009` đến `TASK-015`.
+  - Bảo toàn ranh giới: TASK-008 chỉ áp dụng B/L và AWB (chính xác 24 header paths + 2 reference lists bao gồm 3 party `tax_id`), không mở rộng sang manifest rời hay đa phương thức; giữ `GAP-CLASSIFIER-008` OPEN ở vị trí sau 008C và trước 008D.
+  - Phạm vi: 19 Markdown files, base `66839bf`, commit `c8032cc`; kết quả kiểm tra `git diff --check` sạch; Pytest NOT RUN (docs-only).
 - `TASK-007 — Packing List Extraction (EPIC)` (DONE — Hoàn thành toàn diện Epic qua PR #7–#11, merge commit cuối `6d60351`)
   - Hoàn thành đầy đủ 5 nhiệm vụ thành phần: TASK-007A (Foundation/Contracts), TASK-007B (Deterministic Headers), TASK-007C (Deterministic Excel Items), TASK-007D (Service & Persistence Envelope v2), TASK-007E (Integration & Regression).
   - Đảm bảo 100% tính tương thích ngược với luồng trích xuất Commercial Invoice envelope v1; bảo vệ tính bất biến của source file và lưu trữ an toàn với SQLite; canonical schema vẫn là 0.1 (khác với phiên bản database và envelope).

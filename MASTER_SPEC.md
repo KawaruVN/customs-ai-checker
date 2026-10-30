@@ -3,8 +3,8 @@
 # Customs AI Checker — Master Specification
 
 Amendment 2026-10-30: Owner requirements for pre-transmission declaration checking
-are recorded in Section 61. Technical design in this docs amendment is pending
-independent review, Leader approval, merge and closure; it is not runtime functionality.
+are recorded in Section 61. Technical design in this docs amendment has been reviewed,
+approved and closed (commit c8032cc); it represents target architecture and not runtime functionality.
 
 Version: 0.1  
 Status: Draft  

@@ -1,7 +1,7 @@
 # ADR-004 — Arrival Notice and declaration source policy
 
 Date: 2026-10-30  
-Status: Proposed — technical docs amendment pending independent review, Leader decision, merge and closure  
+Status: Accepted — Architectural orientation and operational source policy approved (2026-10-30); committed directly to main by Owner without PR (commit c8032cc507a658e76fd7dc481ac683f8e61c428d); exact future schemas, codecs, and classifier contracts require separate task-specific review and approval.<br>
 Developer: Codex — Main Developer  
 Reviewer: Antigravity — Independent Technical Reviewer / QA  
 Business authority: Project Owner requirements supplied through Project Leader  
@@ -165,4 +165,7 @@ No claim of runtime readiness is made. Baseline1422 is reported from TASK-007 cl
 pytest may be NOT RUN for this docs-only amendment. Developer validation and Antigravity
 independent review apply to the exact tracked + untracked documentation diff.
 
-Reviewer decision: Pending. Project Leader technical decision: Pending.
+Reviewer decision: APPROVE (Antigravity independent review, 2026-10-30).
+Project Leader decision: APPROVE (ChatGPT technical approval, 2026-10-30).
+Publication event: Committed directly to `main` by Project Owner (KawaruVN) without PR at commit `c8032cc507a658e76fd7dc481ac683f8e61c428d`.
+Closure state: Closed (2026-10-30). Architectural orientation and operational source policy OP-AN-DECL v1 are accepted. Exact future schemas (ArrivalNotice), persistence codecs, and classifier boundaries (GAP-CLASSIFIER-008) require separate technical approval before implementation.

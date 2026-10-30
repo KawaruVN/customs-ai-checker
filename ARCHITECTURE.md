@@ -9,7 +9,7 @@ Applies to: V1
 
 Amendment 2026-10-30: Sections 69–72 propose the architecture needed for the
 Owner's versioned arrival/declaration policy (MASTER_SPEC Section 61). Business
-requirements are Owner-approved; technical amendment review/merge/closure is pending.
+requirements are Owner-approved; technical amendment review, merge and closure completed (commit c8032cc).
 Descriptions of future modules are target design, not claims of implemented behavior.
 
 ---
